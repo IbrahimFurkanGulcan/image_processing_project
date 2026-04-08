@@ -29,12 +29,17 @@
             picInput2 = new PictureBox();
             picOutput = new PictureBox();
             pnlMasterParametre = new Panel();
-            pnlBinary = new Panel();
-            esikdegeri = new Label();
-            trkThreshold = new TrackBar();
+            pnlNoise = new Panel();
+            lblNoiseAdd = new Label();
+            cmbNoiseAdd = new ComboBox();
+            lblNoiseRemove = new Label();
+            cmbNoiseRemove = new ComboBox();
             pnlThresholding = new Panel();
             esikdegerLabel = new Label();
             trkTreshold2 = new TrackBar();
+            pnlBinary = new Panel();
+            esikdegeri = new Label();
+            trkThreshold = new TrackBar();
             pnlCrop = new Panel();
             width = new Label();
             higth = new Label();
@@ -63,7 +68,16 @@
             pnlHistogram = new Panel();
             histLabel = new Label();
             cmbHistogram = new ComboBox();
+            pnlMatrixFilter = new Panel();
+            lblMatrixTitle = new Label();
+            lblMatrixSize = new Label();
+            cmbMatrixSize = new ComboBox();
             btnUygula = new Button();
+            pnlMorphology = new Panel();
+            lblMorphologyType = new Label();
+            cmbMorphologyType = new ComboBox();
+            lblMorphMatrixSize = new Label();
+            cmbMorphMatrixSize = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -78,10 +92,11 @@
             ((System.ComponentModel.ISupportInitialize)picInput2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picOutput).BeginInit();
             pnlMasterParametre.SuspendLayout();
-            pnlBinary.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)trkThreshold).BeginInit();
+            pnlNoise.SuspendLayout();
             pnlThresholding.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkTreshold2).BeginInit();
+            pnlBinary.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThreshold).BeginInit();
             pnlCrop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numCropHeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numCropWidth).BeginInit();
@@ -95,6 +110,8 @@
             pnlContrast.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkContrast).BeginInit();
             pnlHistogram.SuspendLayout();
+            pnlMatrixFilter.SuspendLayout();
+            pnlMorphology.SuspendLayout();
             SuspendLayout();
             // 
             // splitContainer1
@@ -242,6 +259,8 @@
             // 
             // pnlMasterParametre
             // 
+            pnlMasterParametre.Controls.Add(pnlMatrixFilter);
+            pnlMasterParametre.Controls.Add(pnlNoise);
             pnlMasterParametre.Controls.Add(pnlThresholding);
             pnlMasterParametre.Controls.Add(pnlBinary);
             pnlMasterParametre.Controls.Add(pnlCrop);
@@ -250,12 +269,99 @@
             pnlMasterParametre.Controls.Add(pnlArithmetic);
             pnlMasterParametre.Controls.Add(pnlContrast);
             pnlMasterParametre.Controls.Add(pnlHistogram);
+            pnlMasterParametre.Controls.Add(pnlMorphology);
             pnlMasterParametre.Dock = DockStyle.Fill;
             pnlMasterParametre.Location = new Point(14, 17);
             pnlMasterParametre.Margin = new Padding(4, 5, 4, 5);
             pnlMasterParametre.Name = "pnlMasterParametre";
             pnlMasterParametre.Size = new Size(1249, 441);
             pnlMasterParametre.TabIndex = 10;
+            // 
+            // pnlNoise
+            // 
+            pnlNoise.Controls.Add(lblNoiseAdd);
+            pnlNoise.Controls.Add(cmbNoiseAdd);
+            pnlNoise.Controls.Add(lblNoiseRemove);
+            pnlNoise.Controls.Add(cmbNoiseRemove);
+            pnlNoise.Dock = DockStyle.Fill;
+            pnlNoise.Location = new Point(0, 0);
+            pnlNoise.Margin = new Padding(4, 5, 4, 5);
+            pnlNoise.Name = "pnlNoise";
+            pnlNoise.Size = new Size(1249, 441);
+            pnlNoise.TabIndex = 18;
+            pnlNoise.Visible = false;
+            // 
+            // lblNoiseAdd
+            // 
+            lblNoiseAdd.AutoSize = true;
+            lblNoiseAdd.Location = new Point(39, 45);
+            lblNoiseAdd.Margin = new Padding(4, 0, 4, 0);
+            lblNoiseAdd.Name = "lblNoiseAdd";
+            lblNoiseAdd.Size = new Size(106, 25);
+            lblNoiseAdd.TabIndex = 1;
+            lblNoiseAdd.Text = "Gürültü Ekle";
+            // 
+            // cmbNoiseAdd
+            // 
+            cmbNoiseAdd.FormattingEnabled = true;
+            cmbNoiseAdd.Items.AddRange(new object[] { "Salt & Pepper" });
+            cmbNoiseAdd.Location = new Point(145, 40);
+            cmbNoiseAdd.Margin = new Padding(4, 5, 4, 5);
+            cmbNoiseAdd.Name = "cmbNoiseAdd";
+            cmbNoiseAdd.Size = new Size(200, 33);
+            cmbNoiseAdd.TabIndex = 0;
+            // 
+            // lblNoiseRemove
+            // 
+            lblNoiseRemove.AutoSize = true;
+            lblNoiseRemove.Location = new Point(400, 45);
+            lblNoiseRemove.Margin = new Padding(4, 0, 4, 0);
+            lblNoiseRemove.Name = "lblNoiseRemove";
+            lblNoiseRemove.Size = new Size(132, 25);
+            lblNoiseRemove.TabIndex = 3;
+            lblNoiseRemove.Text = "Gürültü Temizle";
+            // 
+            // cmbNoiseRemove
+            // 
+            cmbNoiseRemove.FormattingEnabled = true;
+            cmbNoiseRemove.Items.AddRange(new object[] { "Mean Filtresi", "Median Filtresi" });
+            cmbNoiseRemove.Location = new Point(540, 40);
+            cmbNoiseRemove.Margin = new Padding(4, 5, 4, 5);
+            cmbNoiseRemove.Name = "cmbNoiseRemove";
+            cmbNoiseRemove.Size = new Size(200, 33);
+            cmbNoiseRemove.TabIndex = 2;
+            // 
+            // pnlThresholding
+            // 
+            pnlThresholding.Controls.Add(esikdegerLabel);
+            pnlThresholding.Controls.Add(trkTreshold2);
+            pnlThresholding.Dock = DockStyle.Fill;
+            pnlThresholding.Location = new Point(0, 0);
+            pnlThresholding.Margin = new Padding(4, 5, 4, 5);
+            pnlThresholding.Name = "pnlThresholding";
+            pnlThresholding.Size = new Size(1249, 441);
+            pnlThresholding.TabIndex = 15;
+            pnlThresholding.Visible = false;
+            // 
+            // esikdegerLabel
+            // 
+            esikdegerLabel.AutoSize = true;
+            esikdegerLabel.Location = new Point(39, 45);
+            esikdegerLabel.Margin = new Padding(4, 0, 4, 0);
+            esikdegerLabel.Name = "esikdegerLabel";
+            esikdegerLabel.Size = new Size(99, 25);
+            esikdegerLabel.TabIndex = 1;
+            esikdegerLabel.Text = "Eşik Değeri";
+            // 
+            // trkTreshold2
+            // 
+            trkTreshold2.Location = new Point(157, 33);
+            trkTreshold2.Margin = new Padding(4, 5, 4, 5);
+            trkTreshold2.Maximum = 255;
+            trkTreshold2.Name = "trkTreshold2";
+            trkTreshold2.Size = new Size(429, 69);
+            trkTreshold2.TabIndex = 0;
+            trkTreshold2.Value = 128;
             // 
             // pnlBinary
             // 
@@ -288,38 +394,6 @@
             trkThreshold.Size = new Size(429, 69);
             trkThreshold.TabIndex = 0;
             trkThreshold.Value = 128;
-            // 
-            // pnlThresholding
-            // 
-            pnlThresholding.Controls.Add(esikdegerLabel);
-            pnlThresholding.Controls.Add(trkTreshold2);
-            pnlThresholding.Dock = DockStyle.Fill;
-            pnlThresholding.Location = new Point(0, 0);
-            pnlThresholding.Margin = new Padding(4, 5, 4, 5);
-            pnlThresholding.Name = "pnlThresholding";
-            pnlThresholding.Size = new Size(1249, 441);
-            pnlThresholding.TabIndex = 15;
-            pnlThresholding.Visible = false;
-            // 
-            // esikdegerLabel
-            // 
-            esikdegerLabel.AutoSize = true;
-            esikdegerLabel.Location = new Point(39, 45);
-            esikdegerLabel.Margin = new Padding(4, 0, 4, 0);
-            esikdegerLabel.Name = "esikdegerLabel";
-            esikdegerLabel.Size = new Size(109, 29);
-            esikdegerLabel.TabIndex = 1;
-            esikdegerLabel.Text = "Eşik Değeri";
-            // 
-            // trkTreshold2
-            // 
-            trkTreshold2.Location = new Point(157, 33);
-            trkTreshold2.Margin = new Padding(4, 5, 4, 5);
-            trkTreshold2.Maximum = 255;
-            trkTreshold2.Name = "trkTreshold2";
-            trkTreshold2.Size = new Size(429, 69);
-            trkTreshold2.TabIndex = 0;
-            trkTreshold2.Value = 128;
             // 
             // pnlCrop
             // 
@@ -621,6 +695,103 @@
             cmbHistogram.Size = new Size(284, 33);
             cmbHistogram.TabIndex = 0;
             // 
+            // pnlMatrixFilter
+            // 
+            pnlMatrixFilter.Controls.Add(lblMatrixTitle);
+            pnlMatrixFilter.Controls.Add(lblMatrixSize);
+            pnlMatrixFilter.Controls.Add(cmbMatrixSize);
+            pnlMatrixFilter.Dock = DockStyle.Fill;
+            pnlMatrixFilter.Location = new Point(0, 0);
+            pnlMatrixFilter.Margin = new Padding(4, 5, 4, 5);
+            pnlMatrixFilter.Name = "pnlMatrixFilter";
+            pnlMatrixFilter.Size = new Size(1249, 441);
+            pnlMatrixFilter.TabIndex = 19;
+            pnlMatrixFilter.Visible = false;
+            // 
+            // lblMatrixTitle
+            // 
+            lblMatrixTitle.AutoSize = true;
+            lblMatrixTitle.Location = new Point(39, 45);
+            lblMatrixTitle.Margin = new Padding(4, 0, 4, 0);
+            lblMatrixTitle.Name = "lblMatrixTitle";
+            lblMatrixTitle.Size = new Size(117, 25);
+            lblMatrixTitle.TabIndex = 1;
+            lblMatrixTitle.Text = "MEAN Filtresi";
+            // 
+            // lblMatrixSize
+            // 
+            lblMatrixSize.AutoSize = true;
+            lblMatrixSize.Location = new Point(250, 45);
+            lblMatrixSize.Margin = new Padding(4, 0, 4, 0);
+            lblMatrixSize.Name = "lblMatrixSize";
+            lblMatrixSize.Size = new Size(122, 25);
+            lblMatrixSize.TabIndex = 3;
+            lblMatrixSize.Text = "Matris Boyutu";
+            // 
+            // cmbMatrixSize
+            // 
+            cmbMatrixSize.FormattingEnabled = true;
+            cmbMatrixSize.Items.AddRange(new object[] { "3x3", "5x5", "7x7" });
+            cmbMatrixSize.Location = new Point(380, 40);
+            cmbMatrixSize.Margin = new Padding(4, 5, 4, 5);
+            cmbMatrixSize.Name = "cmbMatrixSize";
+            cmbMatrixSize.Size = new Size(150, 33);
+            cmbMatrixSize.TabIndex = 2;
+            // 
+            // pnlMorphology
+            // 
+            pnlMorphology.Controls.Add(lblMorphologyType);
+            pnlMorphology.Controls.Add(cmbMorphologyType);
+            pnlMorphology.Controls.Add(lblMorphMatrixSize);
+            pnlMorphology.Controls.Add(cmbMorphMatrixSize);
+            pnlMorphology.Dock = DockStyle.Fill;
+            pnlMorphology.Location = new Point(0, 0);
+            pnlMorphology.Margin = new Padding(4, 5, 4, 5);
+            pnlMorphology.Name = "pnlMorphology";
+            pnlMorphology.Size = new Size(1249, 441);
+            pnlMorphology.TabIndex = 20;
+            pnlMorphology.Visible = false;
+            // 
+            // lblMorphologyType
+            // 
+            lblMorphologyType.AutoSize = true;
+            lblMorphologyType.Location = new Point(39, 45);
+            lblMorphologyType.Margin = new Padding(4, 0, 4, 0);
+            lblMorphologyType.Name = "lblMorphologyType";
+            lblMorphologyType.Size = new Size(95, 25);
+            lblMorphologyType.TabIndex = 1;
+            lblMorphologyType.Text = "İşlem Türü";
+            // 
+            // cmbMorphologyType
+            // 
+            cmbMorphologyType.FormattingEnabled = true;
+            cmbMorphologyType.Items.AddRange(new object[] { "Genişleme (Dilation)", "Aşınma (Erosion)", "Açma (Opening)", "Kapama (Closing)" });
+            cmbMorphologyType.Location = new Point(145, 40);
+            cmbMorphologyType.Margin = new Padding(4, 5, 4, 5);
+            cmbMorphologyType.Name = "cmbMorphologyType";
+            cmbMorphologyType.Size = new Size(220, 33);
+            cmbMorphologyType.TabIndex = 0;
+            // 
+            // lblMorphMatrixSize
+            // 
+            lblMorphMatrixSize.AutoSize = true;
+            lblMorphMatrixSize.Location = new Point(410, 45);
+            lblMorphMatrixSize.Margin = new Padding(4, 0, 4, 0);
+            lblMorphMatrixSize.Name = "lblMorphMatrixSize";
+            lblMorphMatrixSize.Size = new Size(122, 25);
+            lblMorphMatrixSize.TabIndex = 3;
+            lblMorphMatrixSize.Text = "Matris Boyutu";
+            // 
+            // cmbMorphMatrixSize
+            // 
+            cmbMorphMatrixSize.FormattingEnabled = true;
+            cmbMorphMatrixSize.Items.AddRange(new object[] { "3x3", "5x5", "7x7" });
+            cmbMorphMatrixSize.Location = new Point(540, 40);
+            cmbMorphMatrixSize.Margin = new Padding(4, 5, 4, 5);
+            cmbMorphMatrixSize.Name = "cmbMorphMatrixSize";
+            cmbMorphMatrixSize.Size = new Size(150, 33);
+            cmbMorphMatrixSize.TabIndex = 2;
+            // 
             // btnUygula
             // 
             btnUygula.Dock = DockStyle.Bottom;
@@ -660,12 +831,14 @@
             ((System.ComponentModel.ISupportInitialize)picInput2).EndInit();
             ((System.ComponentModel.ISupportInitialize)picOutput).EndInit();
             pnlMasterParametre.ResumeLayout(false);
-            pnlBinary.ResumeLayout(false);
-            pnlBinary.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)trkThreshold).EndInit();
+            pnlNoise.ResumeLayout(false);
+            pnlNoise.PerformLayout();
             pnlThresholding.ResumeLayout(false);
             pnlThresholding.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trkTreshold2).EndInit();
+            pnlBinary.ResumeLayout(false);
+            pnlBinary.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThreshold).EndInit();
             pnlCrop.ResumeLayout(false);
             pnlCrop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numCropHeight).EndInit();
@@ -685,12 +858,30 @@
             ((System.ComponentModel.ISupportInitialize)trkContrast).EndInit();
             pnlHistogram.ResumeLayout(false);
             pnlHistogram.PerformLayout();
+            pnlMatrixFilter.ResumeLayout(false);
+            pnlMatrixFilter.PerformLayout();
+            pnlMorphology.ResumeLayout(false);
+            pnlMorphology.PerformLayout();
             ResumeLayout(false);
 
         }
 
         #endregion
 
+        private System.Windows.Forms.Panel pnlMorphology;
+        private System.Windows.Forms.Label lblMorphologyType;
+        private System.Windows.Forms.ComboBox cmbMorphologyType;
+        private System.Windows.Forms.Label lblMorphMatrixSize;
+        private System.Windows.Forms.ComboBox cmbMorphMatrixSize;
+        private System.Windows.Forms.Panel pnlMatrixFilter;
+        private System.Windows.Forms.Label lblMatrixTitle;
+        private System.Windows.Forms.Label lblMatrixSize;
+        private System.Windows.Forms.ComboBox cmbMatrixSize;
+        private System.Windows.Forms.Panel pnlNoise;
+        private System.Windows.Forms.Label lblNoiseAdd;
+        private System.Windows.Forms.ComboBox cmbNoiseAdd;
+        private System.Windows.Forms.Label lblNoiseRemove;
+        private System.Windows.Forms.ComboBox cmbNoiseRemove;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem dosyaToolStripMenuItem;

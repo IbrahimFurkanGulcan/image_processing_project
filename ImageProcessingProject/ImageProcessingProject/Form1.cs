@@ -90,6 +90,21 @@ namespace ImageProcessingProject
                     case "Eşikleme işlemleri (Tek Eşikleme)":
                         pnlThresholding.Visible = true;
                         break;
+                    case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
+                        pnlNoise.Visible = true;
+                        // ComboBox'lar boş gelmesin, varsayılan olarak ilk seçenekler (İşlem Yok) seçili olsun
+                        if (cmbNoiseAdd.SelectedIndex == -1) cmbNoiseAdd.SelectedIndex = 0;
+                        if (cmbNoiseRemove.SelectedIndex == -1) cmbNoiseRemove.SelectedIndex = 0;
+                        break;
+                    case "Konvolüsyon İşlemi (mean)":
+                        pnlMatrixFilter.Visible = true;
+                        if (cmbMatrixSize.SelectedIndex == -1) cmbMatrixSize.SelectedIndex = 0;
+                        break;
+                    case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
+                        pnlMorphology.Visible = true;
+                        if (cmbMorphologyType.SelectedIndex == -1) cmbMorphologyType.SelectedIndex = 0;
+                        if (cmbMorphMatrixSize.SelectedIndex == -1) cmbMorphMatrixSize.SelectedIndex = 0;
+                        break;
                 }
             }
         }
@@ -107,6 +122,9 @@ namespace ImageProcessingProject
             pnlHistogram.Visible = false;
             pnlContrast.Visible = false;
             pnlThresholding.Visible = false;
+            pnlNoise.Visible = false;
+            pnlMorphology.Visible = false;
+            pnlMatrixFilter.Visible = false;
         }
 
         // --- 4. İŞLEMİ UYGULA BUTONU ---
@@ -141,6 +159,12 @@ namespace ImageProcessingProject
                         int aci = (int)numAngle.Value;
                         string enterpolasyon = cmbRotateInterpolation.SelectedItem != null ? cmbRotateInterpolation.SelectedItem.ToString() : "Bilinear";
                         MessageBox.Show($"Resim {aci} derece döndürülüyor. Yöntem: {enterpolasyon}");
+                        break;
+
+                    case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
+                        string islemTuru = cmbMorphologyType.SelectedItem.ToString();
+                        string morphMatris = cmbMorphMatrixSize.SelectedItem.ToString();
+                        MessageBox.Show($"Morfolojik işlem uygulanıyor...\nTür: {islemTuru}\nMatris: {morphMatris}");
                         break;
 
                     default:
