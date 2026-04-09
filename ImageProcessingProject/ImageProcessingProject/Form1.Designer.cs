@@ -29,12 +29,30 @@
             picInput2 = new PictureBox();
             picOutput = new PictureBox();
             pnlMasterParametre = new Panel();
+            pnlHistogram = new Panel();
+            histLabel = new Label();
+            tblHistograms = new TableLayoutPanel();
+            lblHistOriginal = new Label();
+            lblHistResult = new Label();
+            picHistogram = new PictureBox();
+            picHistogramResult = new PictureBox();
+            cmbHistogram = new ComboBox();
+            pnlMatrixFilter = new Panel();
+            lblMatrixTitle = new Label();
+            lblMatrixSize = new Label();
+            cmbMatrixSize = new ComboBox();
             pnlNoise = new Panel();
+            rbNoiseAdd = new RadioButton();
+            rbNoiseRemove = new RadioButton();
             lblNoiseAdd = new Label();
             cmbNoiseAdd = new ComboBox();
             lblNoiseRemove = new Label();
             cmbNoiseRemove = new ComboBox();
             pnlThresholding = new Panel();
+            rbStaticThreshold = new RadioButton();
+            rbDynamicThreshold = new RadioButton();
+            lblThresholdMatrix = new Label();
+            cmbThresholdMatrix = new ComboBox();
             esikdegerLabel = new Label();
             trkTreshold2 = new TrackBar();
             pnlBinary = new Panel();
@@ -65,19 +83,34 @@
             pnlContrast = new Panel();
             konstrastLabel = new Label();
             trkContrast = new TrackBar();
-            pnlHistogram = new Panel();
-            histLabel = new Label();
-            cmbHistogram = new ComboBox();
-            pnlMatrixFilter = new Panel();
-            lblMatrixTitle = new Label();
-            lblMatrixSize = new Label();
-            cmbMatrixSize = new ComboBox();
-            btnUygula = new Button();
             pnlMorphology = new Panel();
             lblMorphologyType = new Label();
+            lblMorphShape = new Label();
+            cmbMorphShape = new ComboBox();
+            gbMorphMatrix = new GroupBox();
             cmbMorphologyType = new ComboBox();
             lblMorphMatrixSize = new Label();
             cmbMorphMatrixSize = new ComboBox();
+            pnlUnsharp = new Panel();
+            lblUnsharpMatrix = new Label();
+            cmbUnsharpMatrix = new ComboBox();
+            pnlEdgeDetection = new Panel();
+            lblEdgeType = new Label();
+            cmbEdgeType = new ComboBox();
+            gbEdgeMatrix = new GroupBox();
+            tlpEdgeMatrix = new TableLayoutPanel();
+            edgeMatrixLabels = new Label[3, 3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    edgeMatrixLabels[i, j] = new Label();
+                }
+            }
+            pnlColorSpace = new Panel();
+            lblColorSpace = new Label();
+            cmbColorSpace = new ComboBox();            
+            btnUygula = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -92,6 +125,10 @@
             ((System.ComponentModel.ISupportInitialize)picInput2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picOutput).BeginInit();
             pnlMasterParametre.SuspendLayout();
+            pnlHistogram.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picHistogram).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picHistogramResult).BeginInit();
+            pnlMatrixFilter.SuspendLayout();
             pnlNoise.SuspendLayout();
             pnlThresholding.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkTreshold2).BeginInit();
@@ -109,9 +146,10 @@
             pnlArithmetic.SuspendLayout();
             pnlContrast.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkContrast).BeginInit();
-            pnlHistogram.SuspendLayout();
-            pnlMatrixFilter.SuspendLayout();
             pnlMorphology.SuspendLayout();
+            pnlUnsharp.SuspendLayout();
+            pnlEdgeDetection.SuspendLayout();
+            pnlColorSpace.SuspendLayout();
             SuspendLayout();
             // 
             // splitContainer1
@@ -259,6 +297,7 @@
             // 
             // pnlMasterParametre
             // 
+            pnlMasterParametre.Controls.Add(pnlHistogram);
             pnlMasterParametre.Controls.Add(pnlMatrixFilter);
             pnlMasterParametre.Controls.Add(pnlNoise);
             pnlMasterParametre.Controls.Add(pnlThresholding);
@@ -268,8 +307,10 @@
             pnlMasterParametre.Controls.Add(pnlScale);
             pnlMasterParametre.Controls.Add(pnlArithmetic);
             pnlMasterParametre.Controls.Add(pnlContrast);
-            pnlMasterParametre.Controls.Add(pnlHistogram);
             pnlMasterParametre.Controls.Add(pnlMorphology);
+            pnlMasterParametre.Controls.Add(pnlUnsharp);
+            pnlMasterParametre.Controls.Add(pnlEdgeDetection);
+            pnlMasterParametre.Controls.Add(pnlColorSpace);
             pnlMasterParametre.Dock = DockStyle.Fill;
             pnlMasterParametre.Location = new Point(14, 17);
             pnlMasterParametre.Margin = new Padding(4, 5, 4, 5);
@@ -277,8 +318,153 @@
             pnlMasterParametre.Size = new Size(1249, 441);
             pnlMasterParametre.TabIndex = 10;
             // 
+            // pnlHistogram
+            // 
+            pnlHistogram.Controls.Add(histLabel);
+            pnlHistogram.Controls.Add(cmbHistogram);
+            pnlHistogram.Controls.Add(tblHistograms);
+            pnlHistogram.Dock = DockStyle.Fill;
+            pnlHistogram.Location = new Point(0, 0);
+            pnlHistogram.Margin = new Padding(4, 5, 4, 5);
+            pnlHistogram.Name = "pnlHistogram";
+            pnlHistogram.Size = new Size(1249, 441);
+            pnlHistogram.TabIndex = 14;
+            pnlHistogram.Visible = false;
+            // 
+            // histLabel
+            // 
+            histLabel.AutoSize = true;
+            histLabel.Location = new Point(39, 45);
+            histLabel.Margin = new Padding(4, 0, 4, 0);
+            histLabel.Name = "histLabel";
+            histLabel.Size = new Size(73, 25);
+            histLabel.TabIndex = 1;
+            histLabel.Text = "İşlemler";
+            // 
+            // tblHistograms
+            // 
+            tblHistograms.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tblHistograms.ColumnCount = 2;
+            tblHistograms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblHistograms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            // Elemanları tablonun hücrelerine (Sütun, Satır) yerleştiriyoruz
+            tblHistograms.Controls.Add(lblHistOriginal, 0, 0);
+            tblHistograms.Controls.Add(lblHistResult, 1, 0);
+            tblHistograms.Controls.Add(picHistogram, 0, 1);
+            tblHistograms.Controls.Add(picHistogramResult, 1, 1);
+            tblHistograms.Location = new Point(39, 90);
+            tblHistograms.Name = "tblHistograms";
+            tblHistograms.RowCount = 2;
+            tblHistograms.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            tblHistograms.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblHistograms.Size = new Size(1170, 320);
+            tblHistograms.TabIndex = 3;
+            // 
+            // lblHistOriginal
+            // 
+            lblHistOriginal.AutoSize = true;
+            lblHistOriginal.Dock = DockStyle.Fill;
+            lblHistOriginal.Location = new Point(3, 0);
+            lblHistOriginal.Name = "lblHistOriginal";
+            lblHistOriginal.Size = new Size(579, 30);
+            lblHistOriginal.TabIndex = 3;
+            lblHistOriginal.Text = "Orijinal Histogram";
+            lblHistOriginal.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblHistResult
+            // 
+            lblHistResult.AutoSize = true;
+            lblHistResult.Dock = DockStyle.Fill;
+            lblHistResult.Location = new Point(588, 0);
+            lblHistResult.Name = "lblHistResult";
+            lblHistResult.Size = new Size(579, 30);
+            lblHistResult.TabIndex = 4;
+            lblHistResult.Text = "İşlenmiş Histogram";
+            lblHistResult.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // picHistogram
+            // 
+            picHistogram.BackColor = Color.White;
+            picHistogram.BorderStyle = BorderStyle.FixedSingle;
+            picHistogram.Dock = DockStyle.Fill;
+            picHistogram.Location = new Point(4, 35);
+            picHistogram.Margin = new Padding(4, 5, 4, 5);
+            picHistogram.Name = "picHistogram";
+            picHistogram.Size = new Size(577, 280);
+            picHistogram.SizeMode = PictureBoxSizeMode.Zoom;
+            picHistogram.TabIndex = 2;
+            picHistogram.TabStop = false;
+            // 
+            // picHistogramResult
+            // 
+            picHistogramResult.BackColor = Color.White;
+            picHistogramResult.BorderStyle = BorderStyle.FixedSingle;
+            picHistogramResult.Dock = DockStyle.Fill;
+            picHistogramResult.Location = new Point(589, 35);
+            picHistogramResult.Margin = new Padding(4, 5, 4, 5);
+            picHistogramResult.Name = "picHistogramResult";
+            picHistogramResult.Size = new Size(577, 280);
+            picHistogramResult.SizeMode = PictureBoxSizeMode.Zoom;
+            picHistogramResult.TabIndex = 2;
+            picHistogramResult.TabStop = false;
+            // 
+            // cmbHistogram
+            // 
+            cmbHistogram.FormattingEnabled = true;
+            cmbHistogram.Items.AddRange(new object[] { "Histogram Tablosu", "Histogram Germe", "Histogram Eşitleme" });
+            cmbHistogram.Location = new Point(129, 40);
+            cmbHistogram.Margin = new Padding(4, 5, 4, 5);
+            cmbHistogram.Name = "cmbHistogram";
+            cmbHistogram.Size = new Size(284, 33);
+            cmbHistogram.TabIndex = 0;
+            // 
+            // pnlMatrixFilter
+            // 
+            pnlMatrixFilter.Controls.Add(lblMatrixTitle);
+            pnlMatrixFilter.Controls.Add(lblMatrixSize);
+            pnlMatrixFilter.Controls.Add(cmbMatrixSize);
+            pnlMatrixFilter.Dock = DockStyle.Fill;
+            pnlMatrixFilter.Location = new Point(0, 0);
+            pnlMatrixFilter.Margin = new Padding(4, 5, 4, 5);
+            pnlMatrixFilter.Name = "pnlMatrixFilter";
+            pnlMatrixFilter.Size = new Size(1249, 441);
+            pnlMatrixFilter.TabIndex = 19;
+            pnlMatrixFilter.Visible = false;
+            // 
+            // lblMatrixTitle
+            // 
+            lblMatrixTitle.AutoSize = true;
+            lblMatrixTitle.Location = new Point(39, 45);
+            lblMatrixTitle.Margin = new Padding(4, 0, 4, 0);
+            lblMatrixTitle.Name = "lblMatrixTitle";
+            lblMatrixTitle.Size = new Size(117, 25);
+            lblMatrixTitle.TabIndex = 1;
+            lblMatrixTitle.Text = "MEAN Filtresi";
+            // 
+            // lblMatrixSize
+            // 
+            lblMatrixSize.AutoSize = true;
+            lblMatrixSize.Location = new Point(250, 45);
+            lblMatrixSize.Margin = new Padding(4, 0, 4, 0);
+            lblMatrixSize.Name = "lblMatrixSize";
+            lblMatrixSize.Size = new Size(122, 25);
+            lblMatrixSize.TabIndex = 3;
+            lblMatrixSize.Text = "Matris Boyutu";
+            // 
+            // cmbMatrixSize
+            // 
+            cmbMatrixSize.FormattingEnabled = true;
+            cmbMatrixSize.Items.AddRange(new object[] { "3x3", "5x5", "7x7" });
+            cmbMatrixSize.Location = new Point(380, 40);
+            cmbMatrixSize.Margin = new Padding(4, 5, 4, 5);
+            cmbMatrixSize.Name = "cmbMatrixSize";
+            cmbMatrixSize.Size = new Size(150, 33);
+            cmbMatrixSize.TabIndex = 2;
+            // 
             // pnlNoise
             // 
+            pnlNoise.Controls.Add(rbNoiseAdd);
+            pnlNoise.Controls.Add(rbNoiseRemove);
             pnlNoise.Controls.Add(lblNoiseAdd);
             pnlNoise.Controls.Add(cmbNoiseAdd);
             pnlNoise.Controls.Add(lblNoiseRemove);
@@ -291,10 +477,34 @@
             pnlNoise.TabIndex = 18;
             pnlNoise.Visible = false;
             // 
+            // rbNoiseAdd
+            // 
+            rbNoiseAdd.AutoSize = true;
+            rbNoiseAdd.Checked = true;
+            rbNoiseAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            rbNoiseAdd.Location = new Point(39, 20);
+            rbNoiseAdd.Name = "rbNoiseAdd";
+            rbNoiseAdd.Size = new Size(130, 29);
+            rbNoiseAdd.TabIndex = 4;
+            rbNoiseAdd.TabStop = true;
+            rbNoiseAdd.Text = "Gürültü Ekle";
+            rbNoiseAdd.CheckedChanged += rbNoise_CheckedChanged;
+            // 
+            // rbNoiseRemove
+            // 
+            rbNoiseRemove.AutoSize = true;
+            rbNoiseRemove.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            rbNoiseRemove.Location = new Point(400, 20);
+            rbNoiseRemove.Name = "rbNoiseRemove";
+            rbNoiseRemove.Size = new Size(155, 29);
+            rbNoiseRemove.TabIndex = 5;
+            rbNoiseRemove.Text = "Gürültü Temizle";
+            rbNoiseRemove.CheckedChanged += rbNoise_CheckedChanged;
+            // 
             // lblNoiseAdd
             // 
             lblNoiseAdd.AutoSize = true;
-            lblNoiseAdd.Location = new Point(39, 45);
+            lblNoiseAdd.Location = new Point(39, 75);
             lblNoiseAdd.Margin = new Padding(4, 0, 4, 0);
             lblNoiseAdd.Name = "lblNoiseAdd";
             lblNoiseAdd.Size = new Size(106, 25);
@@ -305,7 +515,7 @@
             // 
             cmbNoiseAdd.FormattingEnabled = true;
             cmbNoiseAdd.Items.AddRange(new object[] { "Salt & Pepper" });
-            cmbNoiseAdd.Location = new Point(145, 40);
+            cmbNoiseAdd.Location = new Point(145, 70);
             cmbNoiseAdd.Margin = new Padding(4, 5, 4, 5);
             cmbNoiseAdd.Name = "cmbNoiseAdd";
             cmbNoiseAdd.Size = new Size(200, 33);
@@ -314,7 +524,7 @@
             // lblNoiseRemove
             // 
             lblNoiseRemove.AutoSize = true;
-            lblNoiseRemove.Location = new Point(400, 45);
+            lblNoiseRemove.Location = new Point(400, 75);
             lblNoiseRemove.Margin = new Padding(4, 0, 4, 0);
             lblNoiseRemove.Name = "lblNoiseRemove";
             lblNoiseRemove.Size = new Size(132, 25);
@@ -325,7 +535,7 @@
             // 
             cmbNoiseRemove.FormattingEnabled = true;
             cmbNoiseRemove.Items.AddRange(new object[] { "Mean Filtresi", "Median Filtresi" });
-            cmbNoiseRemove.Location = new Point(540, 40);
+            cmbNoiseRemove.Location = new Point(540, 70);
             cmbNoiseRemove.Margin = new Padding(4, 5, 4, 5);
             cmbNoiseRemove.Name = "cmbNoiseRemove";
             cmbNoiseRemove.Size = new Size(200, 33);
@@ -333,8 +543,12 @@
             // 
             // pnlThresholding
             // 
+            pnlThresholding.Controls.Add(rbStaticThreshold);
+            pnlThresholding.Controls.Add(rbDynamicThreshold);
             pnlThresholding.Controls.Add(esikdegerLabel);
             pnlThresholding.Controls.Add(trkTreshold2);
+            pnlThresholding.Controls.Add(lblThresholdMatrix);
+            pnlThresholding.Controls.Add(cmbThresholdMatrix);
             pnlThresholding.Dock = DockStyle.Fill;
             pnlThresholding.Location = new Point(0, 0);
             pnlThresholding.Margin = new Padding(4, 5, 4, 5);
@@ -343,10 +557,34 @@
             pnlThresholding.TabIndex = 15;
             pnlThresholding.Visible = false;
             // 
+            // rbStaticThreshold
+            // 
+            rbStaticThreshold.AutoSize = true;
+            rbStaticThreshold.Checked = true;
+            rbStaticThreshold.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            rbStaticThreshold.Location = new Point(39, 20);
+            rbStaticThreshold.Name = "rbStaticThreshold";
+            rbStaticThreshold.Size = new Size(168, 29);
+            rbStaticThreshold.TabIndex = 2;
+            rbStaticThreshold.TabStop = true;
+            rbStaticThreshold.Text = "Statik Eşikleme";
+            rbStaticThreshold.CheckedChanged += rbThreshold_CheckedChanged;
+            // 
+            // rbDynamicThreshold
+            // 
+            rbDynamicThreshold.AutoSize = true;
+            rbDynamicThreshold.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            rbDynamicThreshold.Location = new Point(300, 20);
+            rbDynamicThreshold.Name = "rbDynamicThreshold";
+            rbDynamicThreshold.Size = new Size(191, 29);
+            rbDynamicThreshold.TabIndex = 3;
+            rbDynamicThreshold.Text = "Dinamik Eşikleme";
+            rbDynamicThreshold.CheckedChanged += rbThreshold_CheckedChanged;
+            // 
             // esikdegerLabel
             // 
             esikdegerLabel.AutoSize = true;
-            esikdegerLabel.Location = new Point(39, 45);
+            esikdegerLabel.Location = new Point(39, 75);
             esikdegerLabel.Margin = new Padding(4, 0, 4, 0);
             esikdegerLabel.Name = "esikdegerLabel";
             esikdegerLabel.Size = new Size(99, 25);
@@ -355,13 +593,33 @@
             // 
             // trkTreshold2
             // 
-            trkTreshold2.Location = new Point(157, 33);
+            trkTreshold2.Location = new Point(157, 63);
             trkTreshold2.Margin = new Padding(4, 5, 4, 5);
             trkTreshold2.Maximum = 255;
             trkTreshold2.Name = "trkTreshold2";
             trkTreshold2.Size = new Size(429, 69);
             trkTreshold2.TabIndex = 0;
             trkTreshold2.Value = 128;
+            // 
+            // lblThresholdMatrix
+            // 
+            lblThresholdMatrix.AutoSize = true;
+            lblThresholdMatrix.Location = new Point(530, 75);
+            lblThresholdMatrix.Margin = new Padding(4, 0, 4, 0);
+            lblThresholdMatrix.Name = "lblThresholdMatrix";
+            lblThresholdMatrix.Size = new Size(122, 25);
+            lblThresholdMatrix.TabIndex = 4;
+            lblThresholdMatrix.Text = "Matris Boyutu";
+            // 
+            // cmbThresholdMatrix
+            // 
+            cmbThresholdMatrix.FormattingEnabled = true;
+            cmbThresholdMatrix.Items.AddRange(new object[] { "3x3", "5x5", "7x7", "11x11", "15x15", "21x21" });
+            cmbThresholdMatrix.Location = new Point(660, 70);
+            cmbThresholdMatrix.Margin = new Padding(4, 5, 4, 5);
+            cmbThresholdMatrix.Name = "cmbThresholdMatrix";
+            cmbThresholdMatrix.Size = new Size(150, 33);
+            cmbThresholdMatrix.TabIndex = 5;
             // 
             // pnlBinary
             // 
@@ -663,87 +921,15 @@
             trkContrast.Size = new Size(429, 69);
             trkContrast.TabIndex = 0;
             // 
-            // pnlHistogram
-            // 
-            pnlHistogram.Controls.Add(histLabel);
-            pnlHistogram.Controls.Add(cmbHistogram);
-            pnlHistogram.Dock = DockStyle.Fill;
-            pnlHistogram.Location = new Point(0, 0);
-            pnlHistogram.Margin = new Padding(4, 5, 4, 5);
-            pnlHistogram.Name = "pnlHistogram";
-            pnlHistogram.Size = new Size(1249, 441);
-            pnlHistogram.TabIndex = 14;
-            pnlHistogram.Visible = false;
-            // 
-            // histLabel
-            // 
-            histLabel.AutoSize = true;
-            histLabel.Location = new Point(39, 45);
-            histLabel.Margin = new Padding(4, 0, 4, 0);
-            histLabel.Name = "histLabel";
-            histLabel.Size = new Size(73, 25);
-            histLabel.TabIndex = 1;
-            histLabel.Text = "İşlemler";
-            // 
-            // cmbHistogram
-            // 
-            cmbHistogram.FormattingEnabled = true;
-            cmbHistogram.Items.AddRange(new object[] { "Histogram Tablosu", "Histogram Germe", "Histogram Eşitleme" });
-            cmbHistogram.Location = new Point(129, 40);
-            cmbHistogram.Margin = new Padding(4, 5, 4, 5);
-            cmbHistogram.Name = "cmbHistogram";
-            cmbHistogram.Size = new Size(284, 33);
-            cmbHistogram.TabIndex = 0;
-            // 
-            // pnlMatrixFilter
-            // 
-            pnlMatrixFilter.Controls.Add(lblMatrixTitle);
-            pnlMatrixFilter.Controls.Add(lblMatrixSize);
-            pnlMatrixFilter.Controls.Add(cmbMatrixSize);
-            pnlMatrixFilter.Dock = DockStyle.Fill;
-            pnlMatrixFilter.Location = new Point(0, 0);
-            pnlMatrixFilter.Margin = new Padding(4, 5, 4, 5);
-            pnlMatrixFilter.Name = "pnlMatrixFilter";
-            pnlMatrixFilter.Size = new Size(1249, 441);
-            pnlMatrixFilter.TabIndex = 19;
-            pnlMatrixFilter.Visible = false;
-            // 
-            // lblMatrixTitle
-            // 
-            lblMatrixTitle.AutoSize = true;
-            lblMatrixTitle.Location = new Point(39, 45);
-            lblMatrixTitle.Margin = new Padding(4, 0, 4, 0);
-            lblMatrixTitle.Name = "lblMatrixTitle";
-            lblMatrixTitle.Size = new Size(117, 25);
-            lblMatrixTitle.TabIndex = 1;
-            lblMatrixTitle.Text = "MEAN Filtresi";
-            // 
-            // lblMatrixSize
-            // 
-            lblMatrixSize.AutoSize = true;
-            lblMatrixSize.Location = new Point(250, 45);
-            lblMatrixSize.Margin = new Padding(4, 0, 4, 0);
-            lblMatrixSize.Name = "lblMatrixSize";
-            lblMatrixSize.Size = new Size(122, 25);
-            lblMatrixSize.TabIndex = 3;
-            lblMatrixSize.Text = "Matris Boyutu";
-            // 
-            // cmbMatrixSize
-            // 
-            cmbMatrixSize.FormattingEnabled = true;
-            cmbMatrixSize.Items.AddRange(new object[] { "3x3", "5x5", "7x7" });
-            cmbMatrixSize.Location = new Point(380, 40);
-            cmbMatrixSize.Margin = new Padding(4, 5, 4, 5);
-            cmbMatrixSize.Name = "cmbMatrixSize";
-            cmbMatrixSize.Size = new Size(150, 33);
-            cmbMatrixSize.TabIndex = 2;
-            // 
             // pnlMorphology
             // 
             pnlMorphology.Controls.Add(lblMorphologyType);
             pnlMorphology.Controls.Add(cmbMorphologyType);
             pnlMorphology.Controls.Add(lblMorphMatrixSize);
             pnlMorphology.Controls.Add(cmbMorphMatrixSize);
+            pnlMorphology.Controls.Add(lblMorphShape);
+            pnlMorphology.Controls.Add(cmbMorphShape);
+            pnlMorphology.Controls.Add(gbMorphMatrix);
             pnlMorphology.Dock = DockStyle.Fill;
             pnlMorphology.Location = new Point(0, 0);
             pnlMorphology.Margin = new Padding(4, 5, 4, 5);
@@ -755,10 +941,10 @@
             // lblMorphologyType
             // 
             lblMorphologyType.AutoSize = true;
-            lblMorphologyType.Location = new Point(39, 45);
+            lblMorphologyType.Location = new Point(40, 45);
             lblMorphologyType.Margin = new Padding(4, 0, 4, 0);
             lblMorphologyType.Name = "lblMorphologyType";
-            lblMorphologyType.Size = new Size(95, 25);
+            lblMorphologyType.Size = new Size(94, 25);
             lblMorphologyType.TabIndex = 1;
             lblMorphologyType.Text = "İşlem Türü";
             // 
@@ -791,6 +977,170 @@
             cmbMorphMatrixSize.Name = "cmbMorphMatrixSize";
             cmbMorphMatrixSize.Size = new Size(150, 33);
             cmbMorphMatrixSize.TabIndex = 2;
+            cmbMorphMatrixSize.SelectedIndexChanged += UpdateMorphMatrix_Event;
+            // 
+            // lblMorphShape
+            // 
+            lblMorphShape.AutoSize = true;
+            lblMorphShape.Location = new Point(770, 45);
+            lblMorphShape.Margin = new Padding(4, 0, 4, 0);
+            lblMorphShape.Name = "lblMorphShape";
+            lblMorphShape.Size = new Size(120, 25);
+            lblMorphShape.TabIndex = 5;
+            lblMorphShape.Text = "Yapısal Şekil";
+            // 
+            // cmbMorphShape
+            // 
+            cmbMorphShape.FormattingEnabled = true;
+            cmbMorphShape.Items.AddRange(new object[] { "Kare (Square)", "Daire (Circle)", "Haç (Cross)", "Özel (Custom)" });
+            cmbMorphShape.Location = new Point(885, 40);
+            cmbMorphShape.Margin = new Padding(4, 5, 4, 5);
+            cmbMorphShape.Name = "cmbMorphShape";
+            cmbMorphShape.Size = new Size(150, 33);
+            cmbMorphShape.TabIndex = 4;
+            cmbMorphShape.SelectedIndexChanged += UpdateMorphMatrix_Event;
+            // 
+            // gbMorphMatrix
+            // 
+            gbMorphMatrix.Text = "Yapısal Öğe (Structuring Element)";
+            gbMorphMatrix.Location = new Point(39, 100);
+            gbMorphMatrix.Name = "gbMorphMatrix";
+            gbMorphMatrix.Size = new Size(400, 320);
+            gbMorphMatrix.TabIndex = 6;
+            // 
+            // pnlUnsharp
+            // 
+            pnlUnsharp.Controls.Add(lblUnsharpMatrix);
+            pnlUnsharp.Controls.Add(cmbUnsharpMatrix);
+            pnlUnsharp.Dock = DockStyle.Fill;
+            pnlUnsharp.Location = new Point(0, 0);
+            pnlUnsharp.Margin = new Padding(4, 5, 4, 5);
+            pnlUnsharp.Name = "pnlUnsharp";
+            pnlUnsharp.Size = new Size(1249, 441);
+            pnlUnsharp.TabIndex = 21;
+            pnlUnsharp.Visible = false;
+            // 
+            // lblUnsharpMatrix
+            // 
+            lblUnsharpMatrix.AutoSize = true;
+            lblUnsharpMatrix.Location = new Point(39, 45);
+            lblUnsharpMatrix.Margin = new Padding(4, 0, 4, 0);
+            lblUnsharpMatrix.Name = "lblUnsharpMatrix";
+            lblUnsharpMatrix.Size = new Size(178, 25);
+            lblUnsharpMatrix.TabIndex = 1;
+            lblUnsharpMatrix.Text = "Maske Matris Boyutu";
+            // 
+            // cmbUnsharpMatrix
+            // 
+            cmbUnsharpMatrix.FormattingEnabled = true;
+            cmbUnsharpMatrix.Items.AddRange(new object[] { "3x3", "5x5", "7x7" });
+            cmbUnsharpMatrix.Location = new Point(220, 40);
+            cmbUnsharpMatrix.Margin = new Padding(4, 5, 4, 5);
+            cmbUnsharpMatrix.Name = "cmbUnsharpMatrix";
+            cmbUnsharpMatrix.Size = new Size(150, 33);
+            cmbUnsharpMatrix.TabIndex = 0;
+            // 
+            // pnlEdgeDetection
+            // 
+            pnlEdgeDetection.Controls.Add(lblEdgeType);
+            pnlEdgeDetection.Controls.Add(cmbEdgeType);
+            pnlEdgeDetection.Controls.Add(gbEdgeMatrix);
+            pnlEdgeDetection.Dock = DockStyle.Fill;
+            pnlEdgeDetection.Location = new Point(0, 0);
+            pnlEdgeDetection.Margin = new Padding(4, 5, 4, 5);
+            pnlEdgeDetection.Name = "pnlEdgeDetection";
+            pnlEdgeDetection.Size = new Size(1249, 441);
+            pnlEdgeDetection.TabIndex = 22;
+            pnlEdgeDetection.Visible = false;
+            // 
+            // lblEdgeType
+            // 
+            lblEdgeType.AutoSize = true;
+            lblEdgeType.Location = new Point(39, 45);
+            lblEdgeType.Margin = new Padding(4, 0, 4, 0);
+            lblEdgeType.Name = "lblEdgeType";
+            lblEdgeType.Size = new Size(100, 25);
+            lblEdgeType.TabIndex = 1;
+            lblEdgeType.Text = "Kenar Yönü";
+            // 
+            // cmbEdgeType
+            // 
+            cmbEdgeType.FormattingEnabled = true;
+            cmbEdgeType.Items.AddRange(new object[] { "Yatay (Horizontal)", "Dikey (Vertical)", "Her İkisi (Magnitude)" });
+            cmbEdgeType.Location = new Point(155, 40);
+            cmbEdgeType.Margin = new Padding(4, 5, 4, 5);
+            cmbEdgeType.Name = "cmbEdgeType";
+            cmbEdgeType.Size = new Size(200, 33);
+            cmbEdgeType.TabIndex = 0;
+            cmbEdgeType.SelectedIndexChanged += UpdateEdgeMatrix_Event;
+            // 
+            // gbEdgeMatrix
+            // 
+            gbEdgeMatrix.Text = "Uygulanan Matris (Kernel)";
+            gbEdgeMatrix.Location = new Point(39, 100);
+            gbEdgeMatrix.Name = "gbEdgeMatrix";
+            gbEdgeMatrix.Size = new Size(300, 300);
+            gbEdgeMatrix.TabIndex = 2;
+            // 
+            // tlpEdgeMatrix (3x3 Izgara)
+            // 
+            tlpEdgeMatrix.ColumnCount = 3;
+            tlpEdgeMatrix.RowCount = 3;
+            tlpEdgeMatrix.Dock = DockStyle.Fill;
+            tlpEdgeMatrix.Padding = new Padding(10);
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
+            gbEdgeMatrix.Controls.Add(tlpEdgeMatrix);
+
+            // Izgara içine Label'ları yerleştirme
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    edgeMatrixLabels[i, j].Text = "0"; // Başlangıç değeri
+                    edgeMatrixLabels[i, j].TextAlign = ContentAlignment.MiddleCenter;
+                    edgeMatrixLabels[i, j].Dock = DockStyle.Fill;
+                    edgeMatrixLabels[i, j].BorderStyle = BorderStyle.FixedSingle;
+                    edgeMatrixLabels[i, j].Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+                    tlpEdgeMatrix.Controls.Add(edgeMatrixLabels[i, j], j, i); // (Sütun, Satır)
+                }
+            }
+            // 
+            // pnlColorSpace
+            // 
+            pnlColorSpace.Controls.Add(lblColorSpace);
+            pnlColorSpace.Controls.Add(cmbColorSpace);
+            pnlColorSpace.Dock = DockStyle.Fill;
+            pnlColorSpace.Location = new Point(0, 0);
+            pnlColorSpace.Margin = new Padding(4, 5, 4, 5);
+            pnlColorSpace.Name = "pnlColorSpace";
+            pnlColorSpace.Size = new Size(1249, 441);
+            pnlColorSpace.TabIndex = 23;
+            pnlColorSpace.Visible = false;
+            // 
+            // lblColorSpace
+            // 
+            lblColorSpace.AutoSize = true;
+            lblColorSpace.Location = new Point(39, 45);
+            lblColorSpace.Margin = new Padding(4, 0, 4, 0);
+            lblColorSpace.Name = "lblColorSpace";
+            lblColorSpace.Size = new Size(150, 25);
+            lblColorSpace.TabIndex = 1;
+            lblColorSpace.Text = "Hedef Renk Uzayı";
+            // 
+            // cmbColorSpace
+            // 
+            cmbColorSpace.FormattingEnabled = true;
+            cmbColorSpace.Items.AddRange(new object[] { "RGB -> HSV", "RGB -> YCbCr", "RGB -> CMYK", "RGB -> Gri (Luminance)" });
+            cmbColorSpace.Location = new Point(190, 40);
+            cmbColorSpace.Margin = new Padding(4, 5, 4, 5);
+            cmbColorSpace.Name = "cmbColorSpace";
+            cmbColorSpace.Size = new Size(250, 33);
+            cmbColorSpace.TabIndex = 0;
             // 
             // btnUygula
             // 
@@ -831,6 +1181,12 @@
             ((System.ComponentModel.ISupportInitialize)picInput2).EndInit();
             ((System.ComponentModel.ISupportInitialize)picOutput).EndInit();
             pnlMasterParametre.ResumeLayout(false);
+            pnlHistogram.ResumeLayout(false);
+            pnlHistogram.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picHistogram).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picHistogramResult).EndInit();
+            pnlMatrixFilter.ResumeLayout(false);
+            pnlMatrixFilter.PerformLayout();
             pnlNoise.ResumeLayout(false);
             pnlNoise.PerformLayout();
             pnlThresholding.ResumeLayout(false);
@@ -856,19 +1212,39 @@
             pnlContrast.ResumeLayout(false);
             pnlContrast.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trkContrast).EndInit();
-            pnlHistogram.ResumeLayout(false);
-            pnlHistogram.PerformLayout();
-            pnlMatrixFilter.ResumeLayout(false);
-            pnlMatrixFilter.PerformLayout();
             pnlMorphology.ResumeLayout(false);
             pnlMorphology.PerformLayout();
+            pnlUnsharp.ResumeLayout(false);
+            pnlUnsharp.PerformLayout();
+            pnlEdgeDetection.ResumeLayout(false);
+            pnlEdgeDetection.PerformLayout();
+            pnlColorSpace.ResumeLayout(false);
+            pnlColorSpace.PerformLayout();
             ResumeLayout(false);
+
 
         }
 
         #endregion
 
+        private System.Windows.Forms.RadioButton rbNoiseAdd;
+        private System.Windows.Forms.RadioButton rbNoiseRemove;
+        private System.Windows.Forms.Panel pnlColorSpace;
+        private System.Windows.Forms.Label lblColorSpace;
+        private System.Windows.Forms.ComboBox cmbColorSpace;
+        private System.Windows.Forms.Panel pnlEdgeDetection;
+        private System.Windows.Forms.GroupBox gbEdgeMatrix;
+        private System.Windows.Forms.TableLayoutPanel tlpEdgeMatrix;
+        private System.Windows.Forms.Label[,] edgeMatrixLabels; 
+        private System.Windows.Forms.Label lblEdgeType;
+        private System.Windows.Forms.ComboBox cmbEdgeType;
+        private System.Windows.Forms.Panel pnlUnsharp;
+        private System.Windows.Forms.Label lblUnsharpMatrix;
+        private System.Windows.Forms.ComboBox cmbUnsharpMatrix;
         private System.Windows.Forms.Panel pnlMorphology;
+        private System.Windows.Forms.Label lblMorphShape;
+        private System.Windows.Forms.ComboBox cmbMorphShape;
+        private System.Windows.Forms.GroupBox gbMorphMatrix;        
         private System.Windows.Forms.Label lblMorphologyType;
         private System.Windows.Forms.ComboBox cmbMorphologyType;
         private System.Windows.Forms.Label lblMorphMatrixSize;
@@ -924,10 +1300,19 @@
         private System.Windows.Forms.TrackBar trkContrast;
         private System.Windows.Forms.Panel pnlThresholding;
         private System.Windows.Forms.TrackBar trkTreshold2;
+        private System.Windows.Forms.RadioButton rbStaticThreshold;
+        private System.Windows.Forms.RadioButton rbDynamicThreshold;
+        private System.Windows.Forms.Label lblThresholdMatrix;
+        private System.Windows.Forms.ComboBox cmbThresholdMatrix;
         private System.Windows.Forms.Panel pnlHistogram;
+        private System.Windows.Forms.PictureBox picHistogram;
+        private System.Windows.Forms.PictureBox picHistogramResult;
+        private System.Windows.Forms.Label lblHistOriginal;
+        private System.Windows.Forms.TableLayoutPanel tblHistograms;
+        private System.Windows.Forms.Label lblHistResult;
         private System.Windows.Forms.Label histLabel;
         private System.Windows.Forms.ComboBox cmbHistogram;
         private System.Windows.Forms.Button btnUygula;
-        private Label esikdegerLabel;
+        private System.Windows.Forms.Label esikdegerLabel;
     }
 }
