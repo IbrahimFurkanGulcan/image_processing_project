@@ -31,17 +31,19 @@
             pnlMasterParametre = new Panel();
             pnlHistogram = new Panel();
             histLabel = new Label();
+            cmbHistogram = new ComboBox();
             tblHistograms = new TableLayoutPanel();
             lblHistOriginal = new Label();
             lblHistResult = new Label();
             picHistogram = new PictureBox();
             picHistogramResult = new PictureBox();
-            cmbHistogram = new ComboBox();
             pnlMatrixFilter = new Panel();
             lblMatrixTitle = new Label();
             lblMatrixSize = new Label();
             cmbMatrixSize = new ComboBox();
             pnlNoise = new Panel();
+            lblNoiseMatrixSize = new Label();
+            cmbNoiseMatrixSize = new ComboBox();
             rbNoiseAdd = new RadioButton();
             rbNoiseRemove = new RadioButton();
             lblNoiseAdd = new Label();
@@ -49,12 +51,14 @@
             lblNoiseRemove = new Label();
             cmbNoiseRemove = new ComboBox();
             pnlThresholding = new Panel();
+            numThreshold = new NumericUpDown();            
+            ((System.ComponentModel.ISupportInitialize)(numThreshold)).BeginInit();
             rbStaticThreshold = new RadioButton();
             rbDynamicThreshold = new RadioButton();
-            lblThresholdMatrix = new Label();
-            cmbThresholdMatrix = new ComboBox();
             esikdegerLabel = new Label();
             trkTreshold2 = new TrackBar();
+            lblThresholdMatrix = new Label();
+            cmbThresholdMatrix = new ComboBox();
             pnlBinary = new Panel();
             esikdegeri = new Label();
             trkThreshold = new TrackBar();
@@ -85,12 +89,12 @@
             trkContrast = new TrackBar();
             pnlMorphology = new Panel();
             lblMorphologyType = new Label();
-            lblMorphShape = new Label();
-            cmbMorphShape = new ComboBox();
-            gbMorphMatrix = new GroupBox();
             cmbMorphologyType = new ComboBox();
             lblMorphMatrixSize = new Label();
             cmbMorphMatrixSize = new ComboBox();
+            lblMorphShape = new Label();
+            cmbMorphShape = new ComboBox();
+            gbMorphMatrix = new GroupBox();
             pnlUnsharp = new Panel();
             lblUnsharpMatrix = new Label();
             cmbUnsharpMatrix = new ComboBox();
@@ -99,17 +103,9 @@
             cmbEdgeType = new ComboBox();
             gbEdgeMatrix = new GroupBox();
             tlpEdgeMatrix = new TableLayoutPanel();
-            edgeMatrixLabels = new Label[3, 3];
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    edgeMatrixLabels[i, j] = new Label();
-                }
-            }
             pnlColorSpace = new Panel();
             lblColorSpace = new Label();
-            cmbColorSpace = new ComboBox();            
+            cmbColorSpace = new ComboBox();
             btnUygula = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -126,6 +122,7 @@
             ((System.ComponentModel.ISupportInitialize)picOutput).BeginInit();
             pnlMasterParametre.SuspendLayout();
             pnlHistogram.SuspendLayout();
+            tblHistograms.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picHistogram).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picHistogramResult).BeginInit();
             pnlMatrixFilter.SuspendLayout();
@@ -149,6 +146,7 @@
             pnlMorphology.SuspendLayout();
             pnlUnsharp.SuspendLayout();
             pnlEdgeDetection.SuspendLayout();
+            gbEdgeMatrix.SuspendLayout();
             pnlColorSpace.SuspendLayout();
             SuspendLayout();
             // 
@@ -341,13 +339,22 @@
             histLabel.TabIndex = 1;
             histLabel.Text = "İşlemler";
             // 
+            // cmbHistogram
+            // 
+            cmbHistogram.FormattingEnabled = true;
+            cmbHistogram.Items.AddRange(new object[] { "Histogram Tablosu", "Histogram Germe", "Histogram Eşitleme" });
+            cmbHistogram.Location = new Point(129, 40);
+            cmbHistogram.Margin = new Padding(4, 5, 4, 5);
+            cmbHistogram.Name = "cmbHistogram";
+            cmbHistogram.Size = new Size(284, 33);
+            cmbHistogram.TabIndex = 0;
+            // 
             // tblHistograms
             // 
             tblHistograms.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tblHistograms.ColumnCount = 2;
             tblHistograms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tblHistograms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            // Elemanları tablonun hücrelerine (Sütun, Satır) yerleştiriyoruz
             tblHistograms.Controls.Add(lblHistOriginal, 0, 0);
             tblHistograms.Controls.Add(lblHistResult, 1, 0);
             tblHistograms.Controls.Add(picHistogram, 0, 1);
@@ -408,16 +415,6 @@
             picHistogramResult.TabIndex = 2;
             picHistogramResult.TabStop = false;
             // 
-            // cmbHistogram
-            // 
-            cmbHistogram.FormattingEnabled = true;
-            cmbHistogram.Items.AddRange(new object[] { "Histogram Tablosu", "Histogram Germe", "Histogram Eşitleme" });
-            cmbHistogram.Location = new Point(129, 40);
-            cmbHistogram.Margin = new Padding(4, 5, 4, 5);
-            cmbHistogram.Name = "cmbHistogram";
-            cmbHistogram.Size = new Size(284, 33);
-            cmbHistogram.TabIndex = 0;
-            // 
             // pnlMatrixFilter
             // 
             pnlMatrixFilter.Controls.Add(lblMatrixTitle);
@@ -469,6 +466,8 @@
             pnlNoise.Controls.Add(cmbNoiseAdd);
             pnlNoise.Controls.Add(lblNoiseRemove);
             pnlNoise.Controls.Add(cmbNoiseRemove);
+            pnlNoise.Controls.Add(lblNoiseMatrixSize);
+            pnlNoise.Controls.Add(cmbNoiseMatrixSize);
             pnlNoise.Dock = DockStyle.Fill;
             pnlNoise.Location = new Point(0, 0);
             pnlNoise.Margin = new Padding(4, 5, 4, 5);
@@ -484,7 +483,7 @@
             rbNoiseAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             rbNoiseAdd.Location = new Point(39, 20);
             rbNoiseAdd.Name = "rbNoiseAdd";
-            rbNoiseAdd.Size = new Size(130, 29);
+            rbNoiseAdd.Size = new Size(142, 29);
             rbNoiseAdd.TabIndex = 4;
             rbNoiseAdd.TabStop = true;
             rbNoiseAdd.Text = "Gürültü Ekle";
@@ -496,7 +495,7 @@
             rbNoiseRemove.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             rbNoiseRemove.Location = new Point(400, 20);
             rbNoiseRemove.Name = "rbNoiseRemove";
-            rbNoiseRemove.Size = new Size(155, 29);
+            rbNoiseRemove.Size = new Size(171, 29);
             rbNoiseRemove.TabIndex = 5;
             rbNoiseRemove.Text = "Gürültü Temizle";
             rbNoiseRemove.CheckedChanged += rbNoise_CheckedChanged;
@@ -514,7 +513,7 @@
             // cmbNoiseAdd
             // 
             cmbNoiseAdd.FormattingEnabled = true;
-            cmbNoiseAdd.Items.AddRange(new object[] { "Salt & Pepper" });
+            cmbNoiseAdd.Items.AddRange(new object[] { "Salt & Pepper", "Salt", "Pepper" });
             cmbNoiseAdd.Location = new Point(145, 70);
             cmbNoiseAdd.Margin = new Padding(4, 5, 4, 5);
             cmbNoiseAdd.Name = "cmbNoiseAdd";
@@ -541,6 +540,26 @@
             cmbNoiseRemove.Size = new Size(200, 33);
             cmbNoiseRemove.TabIndex = 2;
             // 
+            // lblNoiseMatrixSize
+            // 
+            lblNoiseMatrixSize.AutoSize = true;
+            lblNoiseMatrixSize.Location = new Point(760, 75);
+            lblNoiseMatrixSize.Margin = new Padding(4, 0, 4, 0);
+            lblNoiseMatrixSize.Name = "lblNoiseMatrixSize";
+            lblNoiseMatrixSize.Size = new Size(122, 25);
+            lblNoiseMatrixSize.TabIndex = 6;
+            lblNoiseMatrixSize.Text = "Matris Boyutu";
+            // 
+            // cmbNoiseMatrixSize
+            // 
+            cmbNoiseMatrixSize.FormattingEnabled = true;
+            cmbNoiseMatrixSize.Items.AddRange(new object[] { "3x3", "5x5", "7x7", "9x9" });
+            cmbNoiseMatrixSize.Location = new Point(890, 70);
+            cmbNoiseMatrixSize.Margin = new Padding(4, 5, 4, 5);
+            cmbNoiseMatrixSize.Name = "cmbNoiseMatrixSize";
+            cmbNoiseMatrixSize.Size = new Size(120, 33);
+            cmbNoiseMatrixSize.TabIndex = 7;
+            // 
             // pnlThresholding
             // 
             pnlThresholding.Controls.Add(rbStaticThreshold);
@@ -549,6 +568,7 @@
             pnlThresholding.Controls.Add(trkTreshold2);
             pnlThresholding.Controls.Add(lblThresholdMatrix);
             pnlThresholding.Controls.Add(cmbThresholdMatrix);
+            pnlThresholding.Controls.Add(numThreshold);
             pnlThresholding.Dock = DockStyle.Fill;
             pnlThresholding.Location = new Point(0, 0);
             pnlThresholding.Margin = new Padding(4, 5, 4, 5);
@@ -557,6 +577,16 @@
             pnlThresholding.TabIndex = 15;
             pnlThresholding.Visible = false;
             // 
+            // numThreshold
+            // 
+            numThreshold.Location = new Point(650, 70);
+            numThreshold.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numThreshold.Name = "numThreshold";
+            numThreshold.Size = new Size(70, 31);
+            numThreshold.TabIndex = 6;
+            numThreshold.Value = new decimal(new int[] { 128, 0, 0, 0 });
+            numThreshold.ValueChanged += NumThreshold_ValueChanged; // Senkronizasyon Olayı
+            // 
             // rbStaticThreshold
             // 
             rbStaticThreshold.AutoSize = true;
@@ -564,7 +594,7 @@
             rbStaticThreshold.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             rbStaticThreshold.Location = new Point(39, 20);
             rbStaticThreshold.Name = "rbStaticThreshold";
-            rbStaticThreshold.Size = new Size(168, 29);
+            rbStaticThreshold.Size = new Size(165, 29);
             rbStaticThreshold.TabIndex = 2;
             rbStaticThreshold.TabStop = true;
             rbStaticThreshold.Text = "Statik Eşikleme";
@@ -574,9 +604,9 @@
             // 
             rbDynamicThreshold.AutoSize = true;
             rbDynamicThreshold.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            rbDynamicThreshold.Location = new Point(300, 20);
+            rbDynamicThreshold.Location = new Point(800, 20);
             rbDynamicThreshold.Name = "rbDynamicThreshold";
-            rbDynamicThreshold.Size = new Size(191, 29);
+            rbDynamicThreshold.Size = new Size(186, 29);
             rbDynamicThreshold.TabIndex = 3;
             rbDynamicThreshold.Text = "Dinamik Eşikleme";
             rbDynamicThreshold.CheckedChanged += rbThreshold_CheckedChanged;
@@ -604,7 +634,7 @@
             // lblThresholdMatrix
             // 
             lblThresholdMatrix.AutoSize = true;
-            lblThresholdMatrix.Location = new Point(530, 75);
+            lblThresholdMatrix.Location = new Point(800, 75);
             lblThresholdMatrix.Margin = new Padding(4, 0, 4, 0);
             lblThresholdMatrix.Name = "lblThresholdMatrix";
             lblThresholdMatrix.Size = new Size(122, 25);
@@ -615,7 +645,7 @@
             // 
             cmbThresholdMatrix.FormattingEnabled = true;
             cmbThresholdMatrix.Items.AddRange(new object[] { "3x3", "5x5", "7x7", "11x11", "15x15", "21x21" });
-            cmbThresholdMatrix.Location = new Point(660, 70);
+            cmbThresholdMatrix.Location = new Point(950, 70);
             cmbThresholdMatrix.Margin = new Padding(4, 5, 4, 5);
             cmbThresholdMatrix.Name = "cmbThresholdMatrix";
             cmbThresholdMatrix.Size = new Size(150, 33);
@@ -985,7 +1015,7 @@
             lblMorphShape.Location = new Point(770, 45);
             lblMorphShape.Margin = new Padding(4, 0, 4, 0);
             lblMorphShape.Name = "lblMorphShape";
-            lblMorphShape.Size = new Size(120, 25);
+            lblMorphShape.Size = new Size(106, 25);
             lblMorphShape.TabIndex = 5;
             lblMorphShape.Text = "Yapısal Şekil";
             // 
@@ -1002,11 +1032,12 @@
             // 
             // gbMorphMatrix
             // 
-            gbMorphMatrix.Text = "Yapısal Öğe (Structuring Element)";
             gbMorphMatrix.Location = new Point(39, 100);
             gbMorphMatrix.Name = "gbMorphMatrix";
             gbMorphMatrix.Size = new Size(400, 320);
             gbMorphMatrix.TabIndex = 6;
+            gbMorphMatrix.TabStop = false;
+            gbMorphMatrix.Text = "Yapısal Öğe (Structuring Element)";
             // 
             // pnlUnsharp
             // 
@@ -1076,39 +1107,30 @@
             // 
             // gbEdgeMatrix
             // 
-            gbEdgeMatrix.Text = "Uygulanan Matris (Kernel)";
+            gbEdgeMatrix.Controls.Add(tlpEdgeMatrix);
             gbEdgeMatrix.Location = new Point(39, 100);
             gbEdgeMatrix.Name = "gbEdgeMatrix";
             gbEdgeMatrix.Size = new Size(300, 300);
             gbEdgeMatrix.TabIndex = 2;
+            gbEdgeMatrix.TabStop = false;
+            gbEdgeMatrix.Text = "Uygulanan Matris (Kernel)";
             // 
-            // tlpEdgeMatrix (3x3 Izgara)
+            // tlpEdgeMatrix
             // 
             tlpEdgeMatrix.ColumnCount = 3;
-            tlpEdgeMatrix.RowCount = 3;
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
             tlpEdgeMatrix.Dock = DockStyle.Fill;
+            tlpEdgeMatrix.Location = new Point(3, 27);
+            tlpEdgeMatrix.Name = "tlpEdgeMatrix";
             tlpEdgeMatrix.Padding = new Padding(10);
-            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
-            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
-            tlpEdgeMatrix.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            tlpEdgeMatrix.RowCount = 3;
             tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
             tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
             tlpEdgeMatrix.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
-            gbEdgeMatrix.Controls.Add(tlpEdgeMatrix);
-
-            // Izgara içine Label'ları yerleştirme
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    edgeMatrixLabels[i, j].Text = "0"; // Başlangıç değeri
-                    edgeMatrixLabels[i, j].TextAlign = ContentAlignment.MiddleCenter;
-                    edgeMatrixLabels[i, j].Dock = DockStyle.Fill;
-                    edgeMatrixLabels[i, j].BorderStyle = BorderStyle.FixedSingle;
-                    edgeMatrixLabels[i, j].Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-                    tlpEdgeMatrix.Controls.Add(edgeMatrixLabels[i, j], j, i); // (Sütun, Satır)
-                }
-            }
+            tlpEdgeMatrix.Size = new Size(294, 270);
+            tlpEdgeMatrix.TabIndex = 0;
             // 
             // pnlColorSpace
             // 
@@ -1153,6 +1175,7 @@
             btnUygula.TabIndex = 9;
             btnUygula.Text = "İŞLEMİ UYGULA";
             btnUygula.UseVisualStyleBackColor = true;
+            btnUygula.Click += btnUygula_Click;
             // 
             // Form1
             // 
@@ -1183,12 +1206,15 @@
             pnlMasterParametre.ResumeLayout(false);
             pnlHistogram.ResumeLayout(false);
             pnlHistogram.PerformLayout();
+            tblHistograms.ResumeLayout(false);
+            tblHistograms.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picHistogram).EndInit();
             ((System.ComponentModel.ISupportInitialize)picHistogramResult).EndInit();
             pnlMatrixFilter.ResumeLayout(false);
             pnlMatrixFilter.PerformLayout();
             pnlNoise.ResumeLayout(false);
             pnlNoise.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(numThreshold)).EndInit();
             pnlThresholding.ResumeLayout(false);
             pnlThresholding.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trkTreshold2).EndInit();
@@ -1218,6 +1244,7 @@
             pnlUnsharp.PerformLayout();
             pnlEdgeDetection.ResumeLayout(false);
             pnlEdgeDetection.PerformLayout();
+            gbEdgeMatrix.ResumeLayout(false);
             pnlColorSpace.ResumeLayout(false);
             pnlColorSpace.PerformLayout();
             ResumeLayout(false);
@@ -1254,6 +1281,8 @@
         private System.Windows.Forms.Label lblMatrixSize;
         private System.Windows.Forms.ComboBox cmbMatrixSize;
         private System.Windows.Forms.Panel pnlNoise;
+        private System.Windows.Forms.Label lblNoiseMatrixSize;
+        private System.Windows.Forms.ComboBox cmbNoiseMatrixSize;
         private System.Windows.Forms.Label lblNoiseAdd;
         private System.Windows.Forms.ComboBox cmbNoiseAdd;
         private System.Windows.Forms.Label lblNoiseRemove;
@@ -1299,6 +1328,7 @@
         private System.Windows.Forms.Label konstrastLabel;
         private System.Windows.Forms.TrackBar trkContrast;
         private System.Windows.Forms.Panel pnlThresholding;
+        private System.Windows.Forms.NumericUpDown numThreshold;
         private System.Windows.Forms.TrackBar trkTreshold2;
         private System.Windows.Forms.RadioButton rbStaticThreshold;
         private System.Windows.Forms.RadioButton rbDynamicThreshold;

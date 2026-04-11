@@ -8,7 +8,13 @@ namespace ImageProcessingProject
     {
         public Form1()
         {
-            InitializeComponent(); // Arayüzü Form1.Designer.cs'den yükler
+            InitializeComponent();
+            CreateEdgeMatrixGrid();// Arayüzü Form1.Designer.cs'den yükler
+                                   // TrackBar kaydığında sayıyı güncellemesi için:
+            trkTreshold2.ValueChanged += TrkTreshold2_ValueChanged;
+
+            // Sayı değiştiğinde TrackBar'ı kaydırması için:
+            numThreshold.ValueChanged += NumThreshold_ValueChanged;
         }
 
         private TextBox[,] morphMatrixTextBoxes;
@@ -87,7 +93,7 @@ namespace ImageProcessingProject
                         tableLayoutPanel1.ColumnStyles[2].Width = 33.33f;
                         break;
                     case "Histogram İşlemleri (germe/genişletme)":
-                        pnlHistogram.Visible = true;                        
+                        pnlHistogram.Visible = true;
                         if (cmbHistogram.SelectedIndex == -1) cmbHistogram.SelectedIndex = 0;
                         break;
                     case "Kontrast Artırma":
@@ -105,6 +111,7 @@ namespace ImageProcessingProject
                         pnlNoise.Visible = true;
                         if (cmbNoiseAdd.SelectedIndex == -1) cmbNoiseAdd.SelectedIndex = 0;
                         if (cmbNoiseRemove.SelectedIndex == -1) cmbNoiseRemove.SelectedIndex = 0;
+                        if (cmbNoiseMatrixSize.SelectedIndex == -1) cmbNoiseMatrixSize.SelectedIndex = 0;
 
                         // Varsayılan olarak ekleme seçili gelsin ve event tetiklensin
                         rbNoiseAdd.Checked = true;
@@ -173,19 +180,27 @@ namespace ImageProcessingProject
         }
 
         // --- 4. İŞLEMİ UYGULA BUTONU ---
+
         private void btnUygula_Click(object sender, EventArgs e)
         {
+
+
+            // 1. KONTROL: Resim var mı?
             if (picInput1.Image == null)
             {
-                MessageBox.Show("Lütfen önce bir resim yükleyin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("HATA: Sol kutuda işlenecek bir resim yok!", "Detektif 1");
                 return;
             }
 
-            if (treeView1.SelectedNode == null || treeView1.SelectedNode.Nodes.Count > 0)
+            // 2. KONTROL: Menüden bir şey seçilmiş mi?
+            if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show("Lütfen sol menüden bir işlem seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("HATA: Sol menüden hiçbir işlem seçilmemiş!", "Detektif 2");
                 return;
             }
+
+            // Seçilen menü isminin başındaki ve sonundaki görünmez boşlukları temizleyelim (Trim)
+            string secilenIslem = treeView1.SelectedNode.Text.Trim();
 
             try
             {
@@ -207,7 +222,6 @@ namespace ImageProcessingProject
                         break;
 
                     case "Histogram İşlemleri (germe/genişletme)":
-                        string secilenIslem = cmbHistogram.SelectedItem.ToString();
 
                         if (secilenIslem == "Histogram Tablosu")
                         {
@@ -228,8 +242,11 @@ namespace ImageProcessingProject
                         break;
 
                     case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
+                        Bitmap srcPrewitt = new Bitmap(picInput1.Image);
                         string secilenYon = cmbEdgeType.SelectedItem.ToString();
-                        MessageBox.Show($"Prewitt algoritması çalıştırılıyor...\nSeçilen Yön: {secilenYon}");
+
+                        // Kenar bulma filtresini uygula
+                        picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
                         break;
 
                     case "Renk Uzayı Dönüşümleri":
@@ -238,28 +255,54 @@ namespace ImageProcessingProject
                         break;
 
                     case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
-                        if (rbNoiseAdd.Checked)
+                        Bitmap kaynakResim = new Bitmap(picInput1.Image);
+
+                        if (rbNoiseAdd.Checked) // EKLEME
                         {
-                            string gurultuEkle = cmbNoiseAdd.SelectedItem.ToString();
-                            MessageBox.Show($"Eklenecek Gürültü: {gurultuEkle}");
+                            if (cmbNoiseAdd.SelectedItem != null)
+                            {
+                                string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
+                                // Türü doğrudan metoda gönderiyoruz (Salt, Pepper veya Salt & Pepper)
+                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, 10, gurultuTuru);
+                            }
                         }
-                        else
+                        else // TEMİZLEME
                         {
-                            string gurultuTemizle = cmbNoiseRemove.SelectedItem.ToString();
-                            MessageBox.Show($"Uygulanacak Filtre: {gurultuTemizle}");
+                            if (cmbNoiseRemove.SelectedItem != null && cmbNoiseMatrixSize.SelectedItem != null)
+                            {
+                                string filtreTuru = cmbNoiseRemove.SelectedItem.ToString();
+
+                                // "5x5" gibi bir string'den '5' rakamını alıyoruz
+                                int matrisBoyutu = int.Parse(cmbNoiseMatrixSize.SelectedItem.ToString().Split('x')[0]);
+
+                                if (filtreTuru == "Mean Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMeanFilter(kaynakResim, matrisBoyutu);
+                                }
+                                else if (filtreTuru == "Median Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMedianFilter(kaynakResim, matrisBoyutu);
+                                }
+                            }
                         }
                         break;
 
                     case "Eşikleme işlemleri (Tek Eşikleme)":
+                        Bitmap srcThreshold = new Bitmap(picInput1.Image);
+
                         if (rbStaticThreshold.Checked)
                         {
+                            // Statik eşikleme
                             int esik = trkTreshold2.Value;
-                            MessageBox.Show($"Statik eşikleme uygulanıyor...\nEşik Değeri: {esik}");
+                            picOutput.Image = ImageProcessor.ApplyStaticThreshold(srcThreshold, esik);
                         }
                         else
                         {
-                            string matris = cmbThresholdMatrix.SelectedItem.ToString();
-                            MessageBox.Show($"Dinamik (Adaptif) eşikleme uygulanıyor...\nMatris Boyutu: {matris}");
+                            // Dinamik (Adaptif) eşikleme - Combobox'tan boyutu sayı olarak ayıklıyoruz
+                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); // Örn: "5x5"
+                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); // "5" rakamını alır
+
+                            picOutput.Image = ImageProcessor.ApplyDynamicThreshold(srcThreshold, matrisBoyutu);
                         }
                         break;
 
@@ -319,30 +362,32 @@ namespace ImageProcessingProject
 
         private void rbNoise_CheckedChanged(object sender, EventArgs e)
         {
-            // Ekle seçiliyse ekleme kutusunu aç, temizlemeyi kapat. Değilse tam tersi.
             if (rbNoiseAdd.Checked)
             {
                 cmbNoiseAdd.Enabled = true;
                 cmbNoiseRemove.Enabled = false;
+                cmbNoiseMatrixSize.Enabled = false; // Eklemede matris kutusu kapalı
             }
             else
             {
                 cmbNoiseAdd.Enabled = false;
                 cmbNoiseRemove.Enabled = true;
+                cmbNoiseMatrixSize.Enabled = true; // Temizlemede matris kutusu açık
             }
         }
 
         private void rbThreshold_CheckedChanged(object sender, EventArgs e)
         {
-            // Statik seçiliyse Trackbar aktif, Matris pasif. Dinamik seçiliyse tam tersi.
             if (rbStaticThreshold.Checked)
             {
                 trkTreshold2.Enabled = true;
+                numThreshold.Enabled = true; // Sayı kutusu aktif
                 cmbThresholdMatrix.Enabled = false;
             }
             else
             {
                 trkTreshold2.Enabled = false;
+                numThreshold.Enabled = false; // Sayı kutusu pasif
                 cmbThresholdMatrix.Enabled = true;
             }
         }
@@ -470,9 +515,47 @@ namespace ImageProcessingProject
             }
         }
 
+        private void CreateEdgeMatrixGrid()
+        {
+            edgeMatrixLabels = new Label[3, 3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    edgeMatrixLabels[i, j] = new Label();
+                    edgeMatrixLabels[i, j].Text = "0";
+                    edgeMatrixLabels[i, j].TextAlign = ContentAlignment.MiddleCenter;
+                    edgeMatrixLabels[i, j].Dock = DockStyle.Fill;
+                    edgeMatrixLabels[i, j].BorderStyle = BorderStyle.FixedSingle;
+                    edgeMatrixLabels[i, j].Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+                    tlpEdgeMatrix.Controls.Add(edgeMatrixLabels[i, j], j, i);
+                }
+            }
+        }
+
         private void cmbHistogram_SelectedIndexChanged(object sender, EventArgs e)
         {
             // İleride histogram seçimi değiştiğinde anlık bir şey yapmak istersen burayı kullanabilirsin.
         }
+
+        // Trackbar kaydırıldığında sayıyı değiştirir
+        private void TrkTreshold2_ValueChanged(object sender, EventArgs e)
+        {
+            if (numThreshold.Value != trkTreshold2.Value)
+            {
+                numThreshold.Value = trkTreshold2.Value;
+            }
+        }
+
+        // Sayı kutusuna rakam yazıldığında Trackbar'ı o hizaya kaydırır
+        private void NumThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            if (trkTreshold2.Value != (int)numThreshold.Value)
+            {
+                trkTreshold2.Value = (int)numThreshold.Value;
+            }
+        }
+
+
     }
 }
