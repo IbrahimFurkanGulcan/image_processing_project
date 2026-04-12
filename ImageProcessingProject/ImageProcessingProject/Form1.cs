@@ -15,6 +15,9 @@ namespace ImageProcessingProject
 
             // Sayı değiştiğinde TrackBar'ı kaydırması için:
             numThreshold.ValueChanged += NumThreshold_ValueChanged;
+
+            trkNoisePercentage.ValueChanged += TrkNoisePercentage_ValueChanged;
+            numNoisePercentage.ValueChanged += NumNoisePercentage_ValueChanged;
         }
 
         private TextBox[,] morphMatrixTextBoxes;
@@ -262,8 +265,10 @@ namespace ImageProcessingProject
                             if (cmbNoiseAdd.SelectedItem != null)
                             {
                                 string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
-                                // Türü doğrudan metoda gönderiyoruz (Salt, Pepper veya Salt & Pepper)
-                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, 10, gurultuTuru);
+                                int oran = trkNoisePercentage.Value; // YENİ: Arayüzden oranı çekiyoruz
+
+                                // Türü ve Oranı metoda gönderiyoruz
+                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, oran, gurultuTuru);
                             }
                         }
                         else // TEMİZLEME
@@ -365,14 +370,20 @@ namespace ImageProcessingProject
             if (rbNoiseAdd.Checked)
             {
                 cmbNoiseAdd.Enabled = true;
+                trkNoisePercentage.Enabled = true; // Oran çubuğu aktif
+                numNoisePercentage.Enabled = true; // Sayı kutusu aktif
+
                 cmbNoiseRemove.Enabled = false;
-                cmbNoiseMatrixSize.Enabled = false; // Eklemede matris kutusu kapalı
+                cmbNoiseMatrixSize.Enabled = false;
             }
             else
             {
                 cmbNoiseAdd.Enabled = false;
+                trkNoisePercentage.Enabled = false; // Oran çubuğu pasif
+                numNoisePercentage.Enabled = false; // Sayı kutusu pasif
+
                 cmbNoiseRemove.Enabled = true;
-                cmbNoiseMatrixSize.Enabled = true; // Temizlemede matris kutusu açık
+                cmbNoiseMatrixSize.Enabled = true;
             }
         }
 
@@ -538,22 +549,36 @@ namespace ImageProcessingProject
             // İleride histogram seçimi değiştiğinde anlık bir şey yapmak istersen burayı kullanabilirsin.
         }
 
-        // Trackbar kaydırıldığında sayıyı değiştirir
+        // 1. TrackBar (Kaydırma Çubuğu) değiştiğinde
         private void TrkTreshold2_ValueChanged(object sender, EventArgs e)
         {
-            if (numThreshold.Value != trkTreshold2.Value)
+            // ÖNEMLİ: Eğer sayı kutusundaki değer zaten çubukla aynıysa işlem yapma!
+            if (numThreshold.Value != (decimal)trkTreshold2.Value)
             {
-                numThreshold.Value = trkTreshold2.Value;
+                numThreshold.Value = (decimal)trkTreshold2.Value;
             }
         }
 
-        // Sayı kutusuna rakam yazıldığında Trackbar'ı o hizaya kaydırır
+        // 2. NumericUpDown (Sayı Kutusu) değiştiğinde
         private void NumThreshold_ValueChanged(object sender, EventArgs e)
         {
+            // ÖNEMLİ: Eğer çubuktaki değer zaten sayı kutusuyla aynıysa işlem yapma!
             if (trkTreshold2.Value != (int)numThreshold.Value)
             {
                 trkTreshold2.Value = (int)numThreshold.Value;
             }
+        }
+
+        private void TrkNoisePercentage_ValueChanged(object sender, EventArgs e)
+        {
+            if (numNoisePercentage.Value != trkNoisePercentage.Value)
+                numNoisePercentage.Value = trkNoisePercentage.Value;
+        }
+
+        private void NumNoisePercentage_ValueChanged(object sender, EventArgs e)
+        {
+            if (trkNoisePercentage.Value != (int)numNoisePercentage.Value)
+                trkNoisePercentage.Value = (int)numNoisePercentage.Value;
         }
 
 

@@ -42,6 +42,11 @@
             lblMatrixSize = new Label();
             cmbMatrixSize = new ComboBox();
             pnlNoise = new Panel();
+            lblNoisePercentage = new Label();
+            trkNoisePercentage = new TrackBar();
+            numNoisePercentage = new NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(trkNoisePercentage)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(numNoisePercentage)).BeginInit();
             lblNoiseMatrixSize = new Label();
             cmbNoiseMatrixSize = new ComboBox();
             rbNoiseAdd = new RadioButton();
@@ -468,6 +473,9 @@
             pnlNoise.Controls.Add(cmbNoiseRemove);
             pnlNoise.Controls.Add(lblNoiseMatrixSize);
             pnlNoise.Controls.Add(cmbNoiseMatrixSize);
+            pnlNoise.Controls.Add(lblNoisePercentage);
+            pnlNoise.Controls.Add(trkNoisePercentage);
+            pnlNoise.Controls.Add(numNoisePercentage);
             pnlNoise.Dock = DockStyle.Fill;
             pnlNoise.Location = new Point(0, 0);
             pnlNoise.Margin = new Padding(4, 5, 4, 5);
@@ -475,6 +483,36 @@
             pnlNoise.Size = new Size(1249, 441);
             pnlNoise.TabIndex = 18;
             pnlNoise.Visible = false;
+            // 
+            // lblNoisePercentage
+            // 
+            lblNoisePercentage.AutoSize = true;
+            lblNoisePercentage.Location = new Point(39, 135);
+            lblNoisePercentage.Margin = new Padding(4, 0, 4, 0);
+            lblNoisePercentage.Name = "lblNoisePercentage";
+            lblNoisePercentage.Size = new Size(82, 25);
+            lblNoisePercentage.TabIndex = 8;
+            lblNoisePercentage.Text = "Oran (%)";
+            // 
+            // trkNoisePercentage
+            // 
+            trkNoisePercentage.Location = new Point(140, 125);
+            trkNoisePercentage.Margin = new Padding(4, 5, 4, 5);
+            trkNoisePercentage.Maximum = 100; // Yüzde olduğu için max 100
+            trkNoisePercentage.Name = "trkNoisePercentage";
+            trkNoisePercentage.Size = new Size(160, 69);
+            trkNoisePercentage.TabIndex = 9;
+            trkNoisePercentage.Value = 10; // Varsayılan %10
+            // 
+            // numNoisePercentage
+            //                                
+            numNoisePercentage.Location = new Point(300, 130);
+            numNoisePercentage.Maximum = new decimal(new int[] { 100, 0, 0, 0 });
+            numNoisePercentage.Name = "numNoisePercentage";
+            numNoisePercentage.Size = new Size(60, 31);
+            numNoisePercentage.TabIndex = 10;
+            numNoisePercentage.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numNoisePercentage.BringToFront(); // Ezilmesini önler
             // 
             // rbNoiseAdd
             // 
@@ -1212,6 +1250,8 @@
             ((System.ComponentModel.ISupportInitialize)picHistogramResult).EndInit();
             pnlMatrixFilter.ResumeLayout(false);
             pnlMatrixFilter.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(trkNoisePercentage)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(numNoisePercentage)).EndInit();
             pnlNoise.ResumeLayout(false);
             pnlNoise.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(numThreshold)).EndInit();
@@ -1281,6 +1321,9 @@
         private System.Windows.Forms.Label lblMatrixSize;
         private System.Windows.Forms.ComboBox cmbMatrixSize;
         private System.Windows.Forms.Panel pnlNoise;
+        private System.Windows.Forms.Label lblNoisePercentage;
+        private System.Windows.Forms.TrackBar trkNoisePercentage;
+        private System.Windows.Forms.NumericUpDown numNoisePercentage;
         private System.Windows.Forms.Label lblNoiseMatrixSize;
         private System.Windows.Forms.ComboBox cmbNoiseMatrixSize;
         private System.Windows.Forms.Label lblNoiseAdd;

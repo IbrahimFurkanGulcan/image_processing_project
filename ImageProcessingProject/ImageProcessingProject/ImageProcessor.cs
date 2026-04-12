@@ -23,11 +23,16 @@ namespace ImageProcessingProject
                 g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
-                // Kaynak ve hedef dikdörtgeni tam olarak eşitliyoruz
-                g.DrawImage(original,
-                    new Rectangle(0, 0, bmp.Width, bmp.Height),
+                // Kaynak ve hedef dikdörtgeni tam olarak eşitliyoruz                         
+                g.DrawImage(original,                                                        
+                    new Rectangle(0, 0, bmp.Width, bmp.Height),                              
                     new Rectangle(0, 0, original.Width, original.Height),
                     GraphicsUnit.Pixel);
+
+                //Bitmap clone = original.Clone(
+                  //  new Rectangle(0, 0, original.Width, original.Height),
+                    //PixelFormat.Format32bppArgb);
+                    //daha kısa yol ama scale olursa çalışmaz
             }
             return bmp;
         }
