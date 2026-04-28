@@ -141,4 +141,53 @@ public class GoruntuIslem
         Bitmap geciciResim = Genisleme(kaynakResim);
         return Asinma(geciciResim);
     }
+    // --- 7. FİLTRELEME: UNSHARP MASK (KESKİNLEŞTİRME) ---
+    public Bitmap UnsharpMask(Bitmap kaynakResim, double miktar = 1.5)
+    {
+        int genislik = kaynakResim.Width;
+        int yukseklik = kaynakResim.Height;
+        Bitmap sonuc = new Bitmap(genislik, yukseklik);
+
+        // 1. ADIM: Önce resmi bulanıklaştır (Box Blur mantığıyla)
+        // Kenarlardan 1 piksel içeriden başlıyoruz
+        for (int x = 1; x < genislik - 1; x++)
+        {
+            for (int y = 1; y < yukseklik - 1; y++)
+            {
+                int toplamR = 0, toplamG = 0, toplamB = 0;
+
+                // 3x3 komşuluktaki pikselleri topla (Bulanıklaştırmak için)
+                for (int i = -1; i <= 1; i++)
+                {
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        Color komsu = kaynakResim.GetPixel(x + i, y + j);
+                        toplamR += komsu.R;
+                        toplamG += komsu.G;
+                        toplamB += komsu.B;
+                    }
+                }
+
+                // Ortalamasını alarak bulanık pikseli bul (9 piksel olduğu için 9'a bölüyoruz)
+                int bulanikR = toplamR / 9;
+                int bulanikG = toplamG / 9;
+                int bulanikB = toplamB / 9;
+
+                // 2. ADIM: Unsharp Mask formülünü uygula
+                Color orjinal = kaynakResim.GetPixel(x, y);
+
+                int yeniR = (int)(orjinal.R + miktar * (orjinal.R - bulanikR));
+                int yeniG = (int)(orjinal.G + miktar * (orjinal.G - bulanikG));
+                int yeniB = (int)(orjinal.B + miktar * (orjinal.B - bulanikB));
+
+                // Sınırları kontrol et (0-255 arası)
+                yeniR = Math.Max(0, Math.Min(255, yeniR));
+                yeniG = Math.Max(0, Math.Min(255, yeniG));
+                yeniB = Math.Max(0, Math.Min(255, yeniB));
+
+                sonuc.SetPixel(x, y, Color.FromArgb(yeniR, yeniG, yeniB));
+            }
+        }
+        return sonuc;
+    }
 }
