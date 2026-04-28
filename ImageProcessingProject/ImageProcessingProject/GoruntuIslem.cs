@@ -69,4 +69,76 @@ public class GoruntuIslem
         }
         return sonuc;
     }
+    // --- 3. MORFOLOJİK İŞLEM: GENİŞLEME (DILATION) ---
+    public Bitmap Genisleme(Bitmap kaynakResim)
+    {
+        Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height);
+
+        // Kenarlarda hata almamak için 1. pikselden başlıyoruz
+        for (int x = 1; x < kaynakResim.Width - 1; x++)
+        {
+            for (int y = 1; y < kaynakResim.Height - 1; y++)
+            {
+                byte maxR = 0, maxG = 0, maxB = 0;
+
+                // 3x3 pencere içinde geziniyoruz (Komşuları kontrol et)
+                for (int i = -1; i <= 1; i++)
+                {
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        Color komsuRenk = kaynakResim.GetPixel(x + i, y + j);
+
+                        // En parlak değeri bul
+                        if (komsuRenk.R > maxR) maxR = komsuRenk.R;
+                        if (komsuRenk.G > maxG) maxG = komsuRenk.G;
+                        if (komsuRenk.B > maxB) maxB = komsuRenk.B;
+                    }
+                }
+                sonuc.SetPixel(x, y, Color.FromArgb(maxR, maxG, maxB));
+            }
+        }
+        return sonuc;
+    }
+
+    // --- 4. MORFOLOJİK İŞLEM: AŞINMA (EROSION) ---
+    public Bitmap Asinma(Bitmap kaynakResim)
+    {
+        Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height);
+
+        for (int x = 1; x < kaynakResim.Width - 1; x++)
+        {
+            for (int y = 1; y < kaynakResim.Height - 1; y++)
+            {
+                byte minR = 255, minG = 255, minB = 255;
+
+                for (int i = -1; i <= 1; i++)
+                {
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        Color komsuRenk = kaynakResim.GetPixel(x + i, y + j);
+
+                        // En karanlık değeri bul
+                        if (komsuRenk.R < minR) minR = komsuRenk.R;
+                        if (komsuRenk.G < minG) minG = komsuRenk.G;
+                        if (komsuRenk.B < minB) minB = komsuRenk.B;
+                    }
+                }
+                sonuc.SetPixel(x, y, Color.FromArgb(minR, minG, minB));
+            }
+        }
+        return sonuc;
+    }
+    // Açma (Opening): Önce Aşınma -> Sonra Genişleme
+    public Bitmap Acma(Bitmap kaynakResim)
+    {
+        Bitmap geciciResim = Asinma(kaynakResim);
+        return Genisleme(geciciResim);
+    }
+
+    // Kapama (Closing): Önce Genişleme -> Sonra Aşınma
+    public Bitmap Kapama(Bitmap kaynakResim)
+    {
+        Bitmap geciciResim = Genisleme(kaynakResim);
+        return Asinma(geciciResim);
+    }
 }
