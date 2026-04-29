@@ -239,9 +239,25 @@ namespace ImageProcessingProject
                         break;
 
                     case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
+                        Bitmap srcMorph = new Bitmap(picInput1.Image);
                         string islemTuru = cmbMorphologyType.SelectedItem.ToString();
-                        string morphMatris = cmbMorphMatrixSize.SelectedItem.ToString();
-                        MessageBox.Show($"Morfolojik işlem uygulanıyor...\nTür: {islemTuru}\nMatris: {morphMatris}");
+
+                        if (islemTuru == "Genişleme (Dilation)")
+                        {
+                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph);
+                        }
+                        else if (islemTuru == "Aşınma (Erosion)")
+                        {
+                            picOutput.Image = GoruntuIslem.Asinma(srcMorph);
+                        }
+                        else if (islemTuru == "Açma (Opening)")
+                        {
+                            picOutput.Image = GoruntuIslem.Acma(srcMorph);
+                        }
+                        else if (islemTuru == "Kapama (Closing)")
+                        {
+                            picOutput.Image = GoruntuIslem.Kapama(srcMorph);
+                        }
                         break;
 
                     case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
@@ -311,8 +327,56 @@ namespace ImageProcessingProject
                         }
                         break;
 
-                    default:
-                        MessageBox.Show("Bu işlem henüz kodlanmadı.");
+                    case "İki Resim Arasında Aritmetik İşlemler (ekleme, bölme)":
+
+                        // 1. İkinci resim yüklü mü kontrolü
+                        if (picInput2.Image == null)
+                        {
+                            MessageBox.Show("Bu işlem için 'İkinci Resmi Yükle' menüsünden 2. bir resim seçmelisiniz!", "Eksik Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // 2. ComboBox'tan işlem seçilmiş mi kontrolü
+                        if (cmbAritmetik.SelectedItem == null)
+                        {
+                            MessageBox.Show("Lütfen yapılacak aritmetik işlemi seçiniz (Toplam, Çıkarma vb.).", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+
+                        Bitmap resim1 = new Bitmap(picInput1.Image);
+                        Bitmap resim2 = new Bitmap(picInput2.Image);
+                        Bitmap sonucAritmetik = null;
+
+                        string islem = cmbAritmetik.SelectedItem.ToString();
+
+                        // Seçilen string değere göre ilgili statik metodu tetikliyoruz
+                        if (islem == "Toplam")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimTopla(resim1, resim2);
+                        }
+                        else if (islem == "Çıkarma")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimCikar(resim1, resim2);
+                        }
+                        else if (islem == "Çarpma")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimCarp(resim1, resim2);
+                        }
+                        else if (islem == "Bölme")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimBol(resim1, resim2);
+                        }
+
+                        // Eğer metodlar null döndürmediyse (yani boyutlar eşleştiyse) resmi ekrana bas
+                        if (sonucAritmetik != null)
+                        {
+                            picOutput.Image = sonucAritmetik;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Hata: İşlem yapılacak resimlerin boyutları (Genişlik ve Yükseklik) birebir aynı olmalıdır!", "Boyut Uyuşmazlığı", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
                         break;
                 }
             }

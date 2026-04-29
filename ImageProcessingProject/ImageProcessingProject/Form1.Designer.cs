@@ -950,7 +950,7 @@
             // cmbAritmetik
             // 
             cmbAritmetik.FormattingEnabled = true;
-            cmbAritmetik.Items.AddRange(new object[] { "Toplam", "Çıkarma", "Çarpma", "Bölme", "Mantıksal VE", "Mantıksal VEYA" });
+            cmbAritmetik.Items.AddRange(new object[] { "Toplam", "Çıkarma", "Çarpma", "Bölme" });
             cmbAritmetik.Location = new Point(129, 40);
             cmbAritmetik.Margin = new Padding(4, 5, 4, 5);
             cmbAritmetik.Name = "cmbAritmetik";
