@@ -16,7 +16,7 @@ namespace ImageProcessingProject
                 return null;
             }
 
-            Bitmap sonuc = new Bitmap(resim1.Width, resim1.Height);
+            Bitmap sonuc = new(resim1.Width, resim1.Height);
 
             for (int x = 0; x < resim1.Width; x++)
             {
@@ -49,7 +49,7 @@ namespace ImageProcessingProject
                 return null;
             }
 
-            Bitmap sonuc = new Bitmap(resim1.Width, resim1.Height);
+            Bitmap sonuc = new(resim1.Width, resim1.Height);
 
             for (int x = 0; x < resim1.Width; x++)
             {
@@ -79,7 +79,7 @@ namespace ImageProcessingProject
         {
             if (resim1.Width != resim2.Width || resim1.Height != resim2.Height) return null;
 
-            Bitmap sonuc = new Bitmap(resim1.Width, resim1.Height);
+            Bitmap sonuc = new(resim1.Width, resim1.Height);
 
             for (int x = 0; x < resim1.Width; x++)
             {
@@ -109,7 +109,7 @@ namespace ImageProcessingProject
         {
             if (resim1.Width != resim2.Width || resim1.Height != resim2.Height) return null;
 
-            Bitmap sonuc = new Bitmap(resim1.Width, resim1.Height);
+            Bitmap sonuc = new(resim1.Width, resim1.Height);
 
             for (int x = 0; x < resim1.Width; x++)
             {
@@ -131,83 +131,156 @@ namespace ImageProcessingProject
         }
 
         // --- 3. MORFOLOJİK İŞLEM: GENİŞLEME (DILATION) ---
-        public static Bitmap Genisleme(Bitmap kaynakResim)
+        // --- YARDIMCI FONKSİYON: Arayüzden Gelen Şekil ve Boyuta Göre Matris Üretici ---
+        public static int[,] MatrisOlustur(int boyut, string sekil)
         {
-            Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height);
+            int[,] matris = new int[boyut, boyut];
+            int merkez = boyut / 2;
 
-            // Kenarlarda hata almamak için 1. pikselden başlıyoruz
-            for (int x = 1; x < kaynakResim.Width - 1; x++)
+            for (int i = 0; i < boyut; i++)
             {
-                for (int y = 1; y < kaynakResim.Height - 1; y++)
+                for (int j = 0; j < boyut; j++)
                 {
-                    byte maxR = 0, maxG = 0, maxB = 0;
-
-                    // 3x3 pencere içinde geziniyoruz (Komşuları kontrol et)
-                    for (int i = -1; i <= 1; i++)
+                    if (sekil == "Kare")
                     {
-                        for (int j = -1; j <= 1; j++)
-                        {
-                            Color komsuRenk = kaynakResim.GetPixel(x + i, y + j);
-
-                            // En parlak değeri bul
-                            if (komsuRenk.R > maxR) maxR = komsuRenk.R;
-                            if (komsuRenk.G > maxG) maxG = komsuRenk.G;
-                            if (komsuRenk.B > maxB) maxB = komsuRenk.B;
-                        }
+                        matris[i, j] = 1; // Karenin her yeri doludur
                     }
-                    sonuc.SetPixel(x, y, Color.FromArgb(maxR, maxG, maxB));
+                    else if (sekil == "Artı")
+                    {
+                        // Artı şeklinde sadece merkez satır ve merkez sütun doludur
+                        if (i == merkez || j == merkez) matris[i, j] = 1;
+                        else matris[i, j] = 0;
+                    }
+                    // İleride arayüze "Daire" veya "Çapraz" eklenirse buraya kolayca eklenebilir
                 }
             }
+            return matris;
+        }
+
+        // --- 1. DİNAMİK VE HIZLI GENİŞLEME (DILATION) ---
+        public static Bitmap Genisleme(Bitmap kaynakResim, int matrisBoyutu, string sekil)
+        {
+            Bitmap sonuc = new(kaynakResim.Width, kaynakResim.Height, PixelFormat.Format24bppRgb);
+
+            int[,] matris = MatrisOlustur(matrisBoyutu, sekil);
+            int offset = matrisBoyutu / 2; // Kenar boşlukları boyuta göre dinamik hesaplanır
+
+            BitmapData srcData = kaynakResim.LockBits(new Rectangle(0, 0, kaynakResim.Width, kaynakResim.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData dstData = sonuc.LockBits(new Rectangle(0, 0, sonuc.Width, sonuc.Height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+
+            unsafe
+            {
+                byte* srcPtr = (byte*)srcData.Scan0;
+                byte* dstPtr = (byte*)dstData.Scan0;
+                int stride = srcData.Stride;
+
+                // Döngüleri offset kadar içeriden başlatıyoruz ki taşma olmasın
+                for (int y = offset; y < kaynakResim.Height - offset; y++)
+                {
+                    for (int x = offset; x < kaynakResim.Width - offset; x++)
+                    {
+                        byte maxB = 0, maxG = 0, maxR = 0;
+
+                        // Arayüzden gelen özel matris boyutuna göre komşuluk taraması
+                        for (int my = -offset; my <= offset; my++)
+                        {
+                            for (int mx = -offset; mx <= offset; mx++)
+                            {
+                                // Sadece matrisin "1" (dolu) olan yerlerini işleme dahil et
+                                if (matris[my + offset, mx + offset] == 1)
+                                {
+                                    byte* piksel = srcPtr + ((y + my) * stride) + ((x + mx) * 3);
+                                    if (piksel[0] > maxB) maxB = piksel[0];
+                                    if (piksel[1] > maxG) maxG = piksel[1];
+                                    if (piksel[2] > maxR) maxR = piksel[2];
+                                }
+                            }
+                        }
+
+                        byte* sonucPiksel = dstPtr + (y * stride) + (x * 3);
+                        sonucPiksel[0] = maxB;
+                        sonucPiksel[1] = maxG;
+                        sonucPiksel[2] = maxR;
+                    }
+                }
+            }
+
+            kaynakResim.UnlockBits(srcData);
+            sonuc.UnlockBits(dstData);
             return sonuc;
         }
 
-        // --- 4. MORFOLOJİK İŞLEM: AŞINMA (EROSION) ---
-        public static Bitmap Asinma(Bitmap kaynakResim)
+        // --- 2. DİNAMİK VE HIZLI AŞINMA (EROSION) ---
+        public static Bitmap Asinma(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
-            Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height);
+            Bitmap sonuc = new(kaynakResim.Width, kaynakResim.Height, PixelFormat.Format24bppRgb);
 
-            for (int x = 1; x < kaynakResim.Width - 1; x++)
+            int[,] matris = MatrisOlustur(matrisBoyutu, sekil);
+            int offset = matrisBoyutu / 2;
+
+            BitmapData srcData = kaynakResim.LockBits(new Rectangle(0, 0, kaynakResim.Width, kaynakResim.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData dstData = sonuc.LockBits(new Rectangle(0, 0, sonuc.Width, sonuc.Height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+
+            unsafe
             {
-                for (int y = 1; y < kaynakResim.Height - 1; y++)
+                byte* srcPtr = (byte*)srcData.Scan0;
+                byte* dstPtr = (byte*)dstData.Scan0;
+                int stride = srcData.Stride;
+
+                for (int y = offset; y < kaynakResim.Height - offset; y++)
                 {
-                    byte minR = 255, minG = 255, minB = 255;
-
-                    for (int i = -1; i <= 1; i++)
+                    for (int x = offset; x < kaynakResim.Width - offset; x++)
                     {
-                        for (int j = -1; j <= 1; j++)
-                        {
-                            Color komsuRenk = kaynakResim.GetPixel(x + i, y + j);
+                        byte minB = 255, minG = 255, minR = 255;
 
-                            // En karanlık değeri bul
-                            if (komsuRenk.R < minR) minR = komsuRenk.R;
-                            if (komsuRenk.G < minG) minG = komsuRenk.G;
-                            if (komsuRenk.B < minB) minB = komsuRenk.B;
+                        for (int my = -offset; my <= offset; my++)
+                        {
+                            for (int mx = -offset; mx <= offset; mx++)
+                            {
+                                if (matris[my + offset, mx + offset] == 1)
+                                {
+                                    byte* piksel = srcPtr + ((y + my) * stride) + ((x + mx) * 3);
+                                    if (piksel[0] < minB) minB = piksel[0];
+                                    if (piksel[1] < minG) minG = piksel[1];
+                                    if (piksel[2] < minR) minR = piksel[2];
+                                }
+                            }
                         }
+
+                        byte* sonucPiksel = dstPtr + (y * stride) + (x * 3);
+                        sonucPiksel[0] = minB;
+                        sonucPiksel[1] = minG;
+                        sonucPiksel[2] = minR;
                     }
-                    sonuc.SetPixel(x, y, Color.FromArgb(minR, minG, minB));
                 }
             }
+
+            kaynakResim.UnlockBits(srcData);
+            sonuc.UnlockBits(dstData);
             return sonuc;
         }
-        // Açma (Opening): Önce Aşınma -> Sonra Genişleme
-        public static Bitmap Acma(Bitmap kaynakResim)
+
+        // --- 3. AÇMA VE KAPAMA (Arayüzde Varsa) ---
+        public static Bitmap Acma(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
-            Bitmap geciciResim = Asinma(kaynakResim);
-            return Genisleme(geciciResim);
+            // Aşınma + Genişleme
+            Bitmap gecici = Asinma(kaynakResim, matrisBoyutu, sekil);
+            return Genisleme(gecici, matrisBoyutu, sekil);
         }
 
-        // Kapama (Closing): Önce Genişleme -> Sonra Aşınma
-        public static Bitmap Kapama(Bitmap kaynakResim)
+        public static Bitmap Kapama(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
-            Bitmap geciciResim = Genisleme(kaynakResim);
-            return Asinma(geciciResim);
+            // Genişleme + Aşınma
+            Bitmap gecici = Genisleme(kaynakResim, matrisBoyutu, sekil);
+            return Asinma(gecici, matrisBoyutu, sekil);
         }
+        
         // --- 7. FİLTRELEME: UNSHARP MASK (KESKİNLEŞTİRME) ---
         public static Bitmap UnsharpMask(Bitmap kaynakResim, double miktar = 1.5)
         {
             int genislik = kaynakResim.Width;
             int yukseklik = kaynakResim.Height;
-            Bitmap sonuc = new Bitmap(genislik, yukseklik);
+            Bitmap sonuc = new(genislik, yukseklik);
 
             // 1. ADIM: Önce resmi bulanıklaştır (Box Blur mantığıyla)
             // Kenarlardan 1 piksel içeriden başlıyoruz

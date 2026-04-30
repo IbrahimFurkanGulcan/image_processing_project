@@ -27,24 +27,24 @@ namespace ImageProcessingProject
         {
             treeView1.Nodes.Clear();
 
-            TreeNode nodeTemel = new TreeNode("Temel İşlemler");
+            TreeNode nodeTemel = new("Temel İşlemler");
             nodeTemel.Nodes.Add("Gri Dönüşüm");
             nodeTemel.Nodes.Add("Binary Dönüşüm");
             treeView1.Nodes.Add(nodeTemel);
 
-            TreeNode nodeGeometrik = new TreeNode("Geometrik İşlemler");
+            TreeNode nodeGeometrik = new("Geometrik İşlemler");
             nodeGeometrik.Nodes.Add("Görüntü Döndürme");
             nodeGeometrik.Nodes.Add("Görüntü Kırpma");
             nodeGeometrik.Nodes.Add("Görüntü Yaklaştırma/Uzaklaştırma");
             treeView1.Nodes.Add(nodeGeometrik);
 
-            TreeNode nodeGelistirme = new TreeNode("Geliştirme");
+            TreeNode nodeGelistirme = new("Geliştirme");
             nodeGelistirme.Nodes.Add("İki Resim Arasında Aritmetik İşlemler (ekleme, bölme)");
             nodeGelistirme.Nodes.Add("Histogram İşlemleri (germe/genişletme)");
             nodeGelistirme.Nodes.Add("Kontrast Artırma");
             treeView1.Nodes.Add(nodeGelistirme);
 
-            TreeNode nodeFiltreler = new TreeNode("Filtreler");
+            TreeNode nodeFiltreler = new("Filtreler");
             nodeFiltreler.Nodes.Add("Eşikleme işlemleri (Tek Eşikleme)");
             nodeFiltreler.Nodes.Add("Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)");
             nodeFiltreler.Nodes.Add("Konvolüsyon İşlemi (mean)");
@@ -53,7 +53,7 @@ namespace ImageProcessingProject
             nodeFiltreler.Nodes.Add("Kenar Bulma Algoritmalarının Kullanımı (prewitt)");
             treeView1.Nodes.Add(nodeFiltreler);
 
-            TreeNode nodeDiger = new TreeNode("Diğer İşlemler");
+            TreeNode nodeDiger = new("Diğer İşlemler");
             nodeDiger.Nodes.Add("Renk Uzayı Dönüşümleri");
             treeView1.Nodes.Add(nodeDiger);
 
@@ -64,7 +64,7 @@ namespace ImageProcessingProject
         }
 
         // --- 2. MENÜDEN İŞLEM SEÇİLDİĞİNDE ---
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        private void TreeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node.Nodes.Count == 0) // Sadece tıklanabilir alt başlıklarsa
             {
@@ -108,7 +108,7 @@ namespace ImageProcessingProject
 
                         // Varsayılan ayarları tetikle
                         rbStaticThreshold.Checked = true;
-                        rbThreshold_CheckedChanged(null, null);
+                        RbThreshold_CheckedChanged(null, null);
                         break;
                     case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
                         pnlNoise.Visible = true;
@@ -118,7 +118,7 @@ namespace ImageProcessingProject
 
                         // Varsayılan olarak ekleme seçili gelsin ve event tetiklensin
                         rbNoiseAdd.Checked = true;
-                        rbNoise_CheckedChanged(null, null);
+                        RbNoise_CheckedChanged(null, null);
                         break;
                     case "Konvolüsyon İşlemi (mean)":
                         pnlMatrixFilter.Visible = true;
@@ -154,7 +154,7 @@ namespace ImageProcessingProject
         private void PanelleriGizle()
         {
             // Ortadaki 2. resim kutusunu gizle
-            if (picInput2 != null) picInput2.Visible = false;
+            picInput2?.Visible = false;
 
             // TABLOYU DÜZELT: Ortadaki sütunu (Column 1) yok et, Giriş ve Çıkış'ı %50-%50 yay.
             tableLayoutPanel1.ColumnStyles[0].Width = 50f; // 1. Resim %50 alan kaplasın
@@ -162,29 +162,29 @@ namespace ImageProcessingProject
             tableLayoutPanel1.ColumnStyles[2].Width = 50f; // Çıktı Resmi %50 alan kaplasın
 
             // Panelleri gizle
-            if (pnlBinary != null) pnlBinary.Visible = false;
-            if (pnlRotate != null) pnlRotate.Visible = false;
-            if (pnlCrop != null) pnlCrop.Visible = false;
-            if (pnlScale != null) pnlScale.Visible = false;
-            if (pnlArithmetic != null) pnlArithmetic.Visible = false;
-            if (pnlHistogram != null) pnlHistogram.Visible = false;
-            if (pnlContrast != null) pnlContrast.Visible = false;
-            if (pnlThresholding != null) pnlThresholding.Visible = false;
-            if (pnlNoise != null) pnlNoise.Visible = false;
-            if (pnlMatrixFilter != null) pnlMatrixFilter.Visible = false;
-            if (pnlMorphology != null) pnlMorphology.Visible = false;
-            if (pnlUnsharp != null) pnlUnsharp.Visible = false;
-            if (pnlEdgeDetection != null) pnlEdgeDetection.Visible = false;
-            if (pnlColorSpace != null) pnlColorSpace.Visible = false;
+            pnlBinary?.Visible = false;
+            pnlRotate?.Visible = false;
+            pnlCrop?.Visible = false;
+            pnlScale?.Visible = false;
+            pnlArithmetic?.Visible = false;
+            pnlHistogram?.Visible = false;
+            pnlContrast?.Visible = false;
+            pnlThresholding?.Visible = false;
+            pnlNoise?.Visible = false;
+            pnlMatrixFilter?.Visible = false;
+            pnlMorphology?.Visible = false;
+            pnlUnsharp?.Visible = false;
+            pnlEdgeDetection?.Visible = false;
+            pnlColorSpace?.Visible = false;
 
             // Histogram tuvalini temizle
-            if (picHistogram != null) picHistogram.Image = null;
-            if (picHistogramResult != null) picHistogramResult.Image = null;
+            picHistogram?.Image = null;
+            picHistogramResult?.Image = null;
         }
 
         // --- 4. İŞLEMİ UYGULA BUTONU ---
 
-        private void btnUygula_Click(object sender, EventArgs e)
+        private void BtnUygula_Click(object sender, EventArgs e)
         {
 
 
@@ -239,29 +239,34 @@ namespace ImageProcessingProject
                         break;
 
                     case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
-                        Bitmap srcMorph = new Bitmap(picInput1.Image);
+                        Bitmap srcMorph = new(picInput1.Image);
                         string islemTuru = cmbMorphologyType.SelectedItem.ToString();
 
+                        // 1. Matris boyutu ve şeklini şimdilik sabitliyoruz (Hata vermemesi için)
+                        int mBoyut = 3;
+                        string mSekil = "Kare";
+
+                        // 2. İşlemleri çağırırken bu 3 bilgiyi (resim, boyut, şekil) gönderiyoruz
                         if (islemTuru == "Genişleme (Dilation)")
                         {
-                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph);
+                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph, mBoyut, mSekil);
                         }
                         else if (islemTuru == "Aşınma (Erosion)")
                         {
-                            picOutput.Image = GoruntuIslem.Asinma(srcMorph);
+                            picOutput.Image = GoruntuIslem.Asinma(srcMorph, mBoyut, mSekil);
                         }
                         else if (islemTuru == "Açma (Opening)")
                         {
-                            picOutput.Image = GoruntuIslem.Acma(srcMorph);
+                            picOutput.Image = GoruntuIslem.Acma(srcMorph, mBoyut, mSekil);
                         }
                         else if (islemTuru == "Kapama (Closing)")
                         {
-                            picOutput.Image = GoruntuIslem.Kapama(srcMorph);
+                            picOutput.Image = GoruntuIslem.Kapama(srcMorph, mBoyut, mSekil);
                         }
                         break;
 
                     case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
-                        Bitmap srcPrewitt = new Bitmap(picInput1.Image);
+                        Bitmap srcPrewitt = new(picInput1.Image);
                         string secilenYon = cmbEdgeType.SelectedItem.ToString();
 
                         // Kenar bulma filtresini uygula
@@ -274,7 +279,7 @@ namespace ImageProcessingProject
                         break;
 
                     case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
-                        Bitmap kaynakResim = new Bitmap(picInput1.Image);
+                        Bitmap kaynakResim = new(picInput1.Image);
 
                         if (rbNoiseAdd.Checked) // EKLEME
                         {
@@ -309,7 +314,7 @@ namespace ImageProcessingProject
                         break;
 
                     case "Eşikleme işlemleri (Tek Eşikleme)":
-                        Bitmap srcThreshold = new Bitmap(picInput1.Image);
+                        Bitmap srcThreshold = new(picInput1.Image);
 
                         if (rbStaticThreshold.Checked)
                         {
@@ -343,8 +348,8 @@ namespace ImageProcessingProject
                             return;
                         }
 
-                        Bitmap resim1 = new Bitmap(picInput1.Image);
-                        Bitmap resim2 = new Bitmap(picInput2.Image);
+                        Bitmap resim1 = new(picInput1.Image);
+                        Bitmap resim2 = new(picInput2.Image);
                         Bitmap sonucAritmetik = null;
 
                         string islem = cmbAritmetik.SelectedItem.ToString();
@@ -387,19 +392,19 @@ namespace ImageProcessingProject
         }
 
         // --- 5. RESİM YÜKLEME KODLARI ---
-        private void resimYükleToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void ResimYükleToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp|Tüm Dosyalar|*.*";
+            OpenFileDialog ofd = new()
+            {
+                Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp|Tüm Dosyalar|*.*"
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    using (var tempImage = Image.FromFile(ofd.FileName))
-                    {
-                        picInput1.BackColor = Color.White;
-                        picInput1.Image = new Bitmap(tempImage);
-                    }
+                    using var tempImage = Image.FromFile(ofd.FileName);
+                    picInput1.BackColor = Color.White;
+                    picInput1.Image = new Bitmap(tempImage);
                 }
                 catch (Exception ex)
                 {
@@ -410,17 +415,17 @@ namespace ImageProcessingProject
 
         private void ikinciResmiYükleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp|Tüm Dosyalar|*.*";
+            OpenFileDialog ofd = new()
+            {
+                Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp|Tüm Dosyalar|*.*"
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    using (var tempImage = Image.FromFile(ofd.FileName))
-                    {
-                        picInput2.BackColor = Color.White;
-                        picInput2.Image = new Bitmap(tempImage);
-                    }
+                    using var tempImage = Image.FromFile(ofd.FileName);
+                    picInput2.BackColor = Color.White;
+                    picInput2.Image = new Bitmap(tempImage);
                 }
                 catch (Exception ex)
                 {
@@ -429,7 +434,7 @@ namespace ImageProcessingProject
             }
         }
 
-        private void rbNoise_CheckedChanged(object sender, EventArgs e)
+        private void RbNoise_CheckedChanged(object sender, EventArgs e)
         {
             if (rbNoiseAdd.Checked)
             {
@@ -451,7 +456,7 @@ namespace ImageProcessingProject
             }
         }
 
-        private void rbThreshold_CheckedChanged(object sender, EventArgs e)
+        private void RbThreshold_CheckedChanged(object sender, EventArgs e)
         {
             if (rbStaticThreshold.Checked)
             {
@@ -498,13 +503,15 @@ namespace ImageProcessingProject
             {
                 for (int j = 0; j < size; j++)
                 {
-                    TextBox txt = new TextBox();
-                    txt.Size = new Size(cellSize, cellSize);
-                    txt.Location = new Point(startX + j * (cellSize + 5), startY + i * (cellSize + 5));
-                    txt.TextAlign = HorizontalAlignment.Center;
-                    txt.MaxLength = 1; // Sadece 1 karakter (0 veya 1)
-                    txt.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-                    txt.ReadOnly = !isCustom; // Özel değilse kutuları kilitle
+                    TextBox txt = new()
+                    {
+                        Size = new Size(cellSize, cellSize),
+                        Location = new Point(startX + j * (cellSize + 5), startY + i * (cellSize + 5)),
+                        TextAlign = HorizontalAlignment.Center,
+                        MaxLength = 1, // Sadece 1 karakter (0 veya 1)
+                        Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                        ReadOnly = !isCustom // Özel değilse kutuları kilitle
+                    };
 
                     // Şekle göre 0 veya 1 atama mantığı
                     if (shape == "Kare (Square)")
@@ -597,18 +604,20 @@ namespace ImageProcessingProject
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    edgeMatrixLabels[i, j] = new Label();
-                    edgeMatrixLabels[i, j].Text = "0";
-                    edgeMatrixLabels[i, j].TextAlign = ContentAlignment.MiddleCenter;
-                    edgeMatrixLabels[i, j].Dock = DockStyle.Fill;
-                    edgeMatrixLabels[i, j].BorderStyle = BorderStyle.FixedSingle;
-                    edgeMatrixLabels[i, j].Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+                    edgeMatrixLabels[i, j] = new Label
+                    {
+                        Text = "0",
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        Dock = DockStyle.Fill,
+                        BorderStyle = BorderStyle.FixedSingle,
+                        Font = new Font("Segoe UI", 12F, FontStyle.Bold)
+                    };
                     tlpEdgeMatrix.Controls.Add(edgeMatrixLabels[i, j], j, i);
                 }
             }
         }
 
-        private void cmbHistogram_SelectedIndexChanged(object sender, EventArgs e)
+        private void CmbHistogram_SelectedIndexChanged(object sender, EventArgs e)
         {
             // İleride histogram seçimi değiştiğinde anlık bir şey yapmak istersen burayı kullanabilirsin.
         }

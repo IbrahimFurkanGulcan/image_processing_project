@@ -12,7 +12,7 @@ namespace ImageProcessingProject
         private static Bitmap Get32BppImage(Bitmap original)
         {
             // Yeni resmi orijinalin boyutuyla oluşturuyoruz
-            Bitmap bmp = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
+            Bitmap bmp = new(original.Width, original.Height, PixelFormat.Format32bppArgb);
 
             // C#'ın resmi kendi kafasına göre büyütüp küçültmesini (DPI Bug) engelle
             bmp.SetResolution(original.HorizontalResolution, original.VerticalResolution);
@@ -43,7 +43,7 @@ namespace ImageProcessingProject
         public static Bitmap AddNoise(Bitmap original, int percentage, string noiseType)
         {
             Bitmap result = Get32BppImage(original);
-            Random rnd = new Random();
+            Random rnd = new();
             BitmapData data = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
             int totalPixels = result.Width * result.Height;
@@ -91,7 +91,7 @@ namespace ImageProcessingProject
         public static Bitmap ApplyMeanFilter(Bitmap original, int matrixSize)
         {
             Bitmap source = Get32BppImage(original);
-            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            Bitmap result = new(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
             BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
@@ -151,7 +151,7 @@ namespace ImageProcessingProject
         public static Bitmap ApplyMedianFilter(Bitmap original, int matrixSize)
         {
             Bitmap source = Get32BppImage(original);
-            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            Bitmap result = new(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
             BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
@@ -223,7 +223,7 @@ namespace ImageProcessingProject
         public static Bitmap ApplyPrewitt(Bitmap original, string direction)
         {
             Bitmap source = Get32BppImage(original);
-            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            Bitmap result = new(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
             BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
@@ -332,7 +332,7 @@ namespace ImageProcessingProject
         public static Bitmap ApplyDynamicThreshold(Bitmap original, int matrixSize)
         {
             Bitmap source = Get32BppImage(original);
-            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            Bitmap result = new(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
             BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
