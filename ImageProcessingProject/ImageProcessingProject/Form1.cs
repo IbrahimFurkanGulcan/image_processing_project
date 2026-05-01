@@ -225,18 +225,40 @@ namespace ImageProcessingProject
                         break;
 
                     case "Histogram İşlemleri (germe/genişletme)":
+                    {
+                        Bitmap srcH = new Bitmap(picInput1.Image);
 
-                        if (secilenIslem == "Histogram Tablosu")
+                        // Once giris histogramini her durumda cizdirelim
+                        int[] histOrj = PikselIslem.HistogramHesapla(srcH);
+                        picHistogram.Image = PikselIslem.HistogramCiz(histOrj);
+
+                        string secimHist = cmbHistogram.SelectedItem != null
+                            ? cmbHistogram.SelectedItem.ToString()
+                            : "Histogram Tablosu";
+
+                        if (secimHist == "Histogram Tablosu")
                         {
-                            MessageBox.Show("Histogram hesaplanıp aşağıdaki beyaz tuvale çizilecek!");
-                            // TODO: picHistogram üzerine Graphics ile çizim kodları buraya gelecek
+                            // Sadece histogrami goster, cikis resmini ellemeyelim
+                            picHistogramResult.Image = null;
                         }
                         else
                         {
-                            MessageBox.Show($"{secilenIslem} işlemi üstteki resme uygulanıyor...");
-                            // TODO: Germe/Eşitleme algoritmaları buraya gelecek
+                            Bitmap cikisHist;
+                            if (secimHist == "Histogram Germe")
+                                cikisHist = PikselIslem.HistogramGerme(srcH);
+                            else if (secimHist == "Histogram Genişletme")
+                                cikisHist = PikselIslem.HistogramGenisletme(srcH);
+                            else // "Histogram Eşitleme"
+                                cikisHist = PikselIslem.HistogramEsitleme(srcH);
+
+                            picOutput.Image = cikisHist;
+
+                            // Cikis histogramini da yan tuvale cizdirelim
+                            int[] histYeni = PikselIslem.HistogramHesapla(new Bitmap(cikisHist));
+                            picHistogramResult.Image = PikselIslem.HistogramCiz(histYeni);
                         }
                         break;
+                    }
 
                     case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
                         Bitmap srcMorph = new Bitmap(picInput1.Image);
@@ -268,10 +290,43 @@ namespace ImageProcessingProject
                         picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
                         break;
 
-                    case "Renk Uzayı Dönüşümleri":
-                        string hedefUzay = cmbColorSpace.SelectedItem.ToString();
-                        MessageBox.Show($"Renk dönüşümü başlatılıyor...\nSeçilen Dönüşüm: {hedefUzay}");
+                    case "Konvolüsyon İşlemi (mean)":
+                    {
+                        if (cmbMatrixSize.SelectedItem == null)
+                        {
+                            MessageBox.Show("Lütfen matris boyutunu seçiniz (3x3, 5x5, 7x7).", "Bilgi");
+                            return;
+                        }
+
+                        Bitmap srcK = new Bitmap(picInput1.Image);
+                        int boyutK = int.Parse(cmbMatrixSize.SelectedItem.ToString().Split('x')[0]);
+                        picOutput.Image = PikselIslem.MeanKonvolusyon(srcK, boyutK);
                         break;
+                    }
+
+                    case "Renk Uzayı Dönüşümleri":
+                    {
+                        if (cmbColorSpace.SelectedItem == null)
+                        {
+                            MessageBox.Show("Lütfen bir renk uzayı dönüşümü seçiniz.", "Bilgi");
+                            return;
+                        }
+
+                        Bitmap srcRu = new Bitmap(picInput1.Image);
+                        string hedefUzay = cmbColorSpace.SelectedItem.ToString();
+
+                        if (hedefUzay == "RGB -> HSV")
+                            picOutput.Image = PikselIslem.RgbToHsv(srcRu);
+                        else if (hedefUzay == "RGB -> YCbCr")
+                            picOutput.Image = PikselIslem.RgbToYCbCr(srcRu);
+                        else if (hedefUzay == "RGB -> CMYK")
+                            picOutput.Image = PikselIslem.RgbToCmyk(srcRu);
+                        else if (hedefUzay == "RGB -> Gri (Luminance)")
+                            picOutput.Image = PikselIslem.RgbToGri(srcRu);
+                        else
+                            MessageBox.Show("Bu dönüşüm henüz desteklenmiyor: " + hedefUzay, "Bilgi");
+                        break;
+                    }
 
                     case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
                         Bitmap kaynakResim = new Bitmap(picInput1.Image);
