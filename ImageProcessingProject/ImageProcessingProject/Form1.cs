@@ -18,6 +18,8 @@ namespace ImageProcessingProject
 
             trkNoisePercentage.ValueChanged += TrkNoisePercentage_ValueChanged;
             numNoisePercentage.ValueChanged += NumNoisePercentage_ValueChanged;
+
+            
         }
 
         private TextBox[,] morphMatrixTextBoxes;
@@ -182,6 +184,7 @@ namespace ImageProcessingProject
             if (picHistogramResult != null) picHistogramResult.Image = null;
         }
 
+
         // --- 4. İŞLEMİ UYGULA BUTONU ---
 
         private void btnUygula_Click(object sender, EventArgs e)
@@ -207,125 +210,155 @@ namespace ImageProcessingProject
 
             try
             {
+                picOutput.Dock = DockStyle.Fill;
+                picOutput.SizeMode = PictureBoxSizeMode.Zoom;
+
                 switch (treeView1.SelectedNode.Text)
                 {
                     case "Gri Dönüşüm":
-                        MessageBox.Show("Griye çevirme işlemi başlatılıyor...");
+                        // ImageProcessor'daki ConvertToGrayscale metodunu tetikliyoruz
+                        Bitmap kaynakGri = new Bitmap(picInput1.Image);
+                        picOutput.Image = ImageProcessor.ConvertToGrayscale(kaynakGri);
                         break;
 
+                    
                     case "Binary Dönüşüm":
-                        int esikDegeri = trkThreshold.Value;
-                        MessageBox.Show($"Resim {esikDegeri} eşik değeri ile Siyah-Beyaz yapılıyor...");
+                        // Arayüzdeki TrackBar (trkThreshold) üzerinden statik değeri alıyoruz
+                        Bitmap kaynakBinary = new Bitmap(picInput1.Image);
+                        int binaryEsik = trkThreshold.Value;
+                        picOutput.Image = ImageProcessor.ConvertToBinary(kaynakBinary, binaryEsik);
                         break;
 
                     case "Görüntü Döndürme":
-                        int aci = (int)numAngle.Value;
-                        string enterpolasyon = cmbRotateInterpolation.SelectedItem != null ? cmbRotateInterpolation.SelectedItem.ToString() : "Bilinear";
-                        MessageBox.Show($"Resim {aci} derece döndürülüyor. Yöntem: {enterpolasyon}");
+
+                        picOutput.Dock = DockStyle.None;
+                        picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                        int aciDegeri = (int)numAngle.Value;
+                        string yontem = cmbRotateInterpolation.Text;
+
+                        Bitmap dondurulmusResim = ImageProcessor.GoruntuDondur((Bitmap)picInput1.Image, aciDegeri, yontem);
+
+                        picOutput.Image = dondurulmusResim;
+
+
                         break;
+
+
+                    case "Kontrast Artırma":
+                        // 1. Asıl kontrast çubuğunun değerini alıyoruz
+                        int secilenKontrast = trkContrast.Value;
+
+                        // 2. Orijinal resmi bozmadan kopyalıyoruz
+                        Bitmap kaynakKontrast = new Bitmap(picInput1.Image);
+
+                        // 3. Değeri motora gönderip sonucu sağdaki kutuya basıyoruz
+                        picOutput.Image = ImageProcessor.KontrastUygula(kaynakKontrast, secilenKontrast);
+
+                        break;
+
+
+                    case "Görüntü Yaklaştırma/Uzaklaştırma":
+
+                        picOutput.Dock = DockStyle.None;
+                        picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                        double secilenOran = Convert.ToDouble(numScale.Value);
+
+                        // Arayüzdeki ComboBox'tan yöntemi okuyoruz (Eğer boşsa varsayılan Bilinear)
+                        string intYontem = cmbScaleInterpolation.SelectedItem != null
+                                        ? cmbScaleInterpolation.SelectedItem.ToString()
+                                        : "Bilinear";
+
+                        if (secilenOran > 0)
+                        {
+                            Bitmap kaynakOlcek = new Bitmap(picInput1.Image);
+
+                            
+                            Bitmap sonucOlcek = ImageProcessor.GoruntuOlcekle(kaynakOlcek, secilenOran, intYontem);
+
+                            picOutput.Image = sonucOlcek;
+
+                            // İLLÜZYONU KIRAN MESAJ: Resmin arka planda gerçekten büyüdüğünü/küçüldüğünü kanıtlar!
+                            MessageBox.Show($"Orijinal Boyut: {kaynakOlcek.Width} x {kaynakOlcek.Height} piksel\n" +
+                                            $"Yeni Boyut: {sonucOlcek.Width} x {sonucOlcek.Height} piksel\n" +
+                                            $"Kullanılan Yöntem: {intYontem}",
+                                            "İşlem Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Lütfen 0'dan büyük bir ölçekleme oranı giriniz.", "Hatalı Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        break;
+
+                    case "Görüntü Kırpma":
+                        {
+                            picOutput.Dock = DockStyle.None;
+                            picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                            // 1. Arayüzden değerleri okuyoruz.
+                            int baslangicX = (int)numCropX.Value;
+                            int baslangicY = (int)numCropY.Value;
+                            int genislik = (int)numCropHeight.Value;
+                            int yukseklik = (int)numCropWidth.Value;
+
+                            // 2. Güvenlik Kontrolü: Sıfır veya eksi değerle resim kırpılamaz.
+                            if (genislik <= 0 || yukseklik <= 0)
+                            {
+                                MessageBox.Show("Lütfen kırpılacak alanın Genişlik ve Yükseklik değerlerini 0'dan büyük giriniz.", "Hatalı Parametre", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                break;
+                            }
+
+                            // 3. Arka planın anladığı dile çeviri (Matematiksel Dönüşüm)
+                            // x2 noktası = Başlangıç X noktası + Kırpılacak Genişlik
+                            int x1 = baslangicX;
+                            int y1 = baslangicY;
+                            int x2 = baslangicX + genislik;
+                            int y2 = baslangicY + yukseklik;
+
+                            // 4. Orijinal resmi koruyarak kopyasını al ve kırpma metoduna gönder
+                            Bitmap kaynakKirpma = new Bitmap(picInput1.Image);
+                            picOutput.Image = ImageProcessor.CropImage(kaynakKirpma, x1, y1, x2, y2);
+
+                            break;
+                        }
+
 
                     case "Histogram İşlemleri (germe/genişletme)":
-
-                        if (secilenIslem == "Histogram Tablosu")
                         {
-                            MessageBox.Show("Histogram hesaplanıp aşağıdaki beyaz tuvale çizilecek!");
-                            // TODO: picHistogram üzerine Graphics ile çizim kodları buraya gelecek
-                        }
-                        else
-                        {
-                            MessageBox.Show($"{secilenIslem} işlemi üstteki resme uygulanıyor...");
-                            // TODO: Germe/Eşitleme algoritmaları buraya gelecek
-                        }
-                        break;
+                            Bitmap srcH = new Bitmap(picInput1.Image);
 
-                    case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
-                        Bitmap srcMorph = new Bitmap(picInput1.Image);
-                        string islemTuru = cmbMorphologyType.SelectedItem.ToString();
+                            // Once giris histogramini her durumda cizdirelim
+                            int[] histOrj = PikselIslem.HistogramHesapla(srcH);
+                            picHistogram.Image = PikselIslem.HistogramCiz(histOrj);
 
-                        if (islemTuru == "Genişleme (Dilation)")
-                        {
-                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph);
-                        }
-                        else if (islemTuru == "Aşınma (Erosion)")
-                        {
-                            picOutput.Image = GoruntuIslem.Asinma(srcMorph);
-                        }
-                        else if (islemTuru == "Açma (Opening)")
-                        {
-                            picOutput.Image = GoruntuIslem.Acma(srcMorph);
-                        }
-                        else if (islemTuru == "Kapama (Closing)")
-                        {
-                            picOutput.Image = GoruntuIslem.Kapama(srcMorph);
-                        }
-                        break;
+                            string secimHist = cmbHistogram.SelectedItem != null
+                                ? cmbHistogram.SelectedItem.ToString()
+                                : "Histogram Tablosu";
 
-                    case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
-                        Bitmap srcPrewitt = new Bitmap(picInput1.Image);
-                        string secilenYon = cmbEdgeType.SelectedItem.ToString();
-
-                        // Kenar bulma filtresini uygula
-                        picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
-                        break;
-
-                    case "Renk Uzayı Dönüşümleri":
-                        string hedefUzay = cmbColorSpace.SelectedItem.ToString();
-                        MessageBox.Show($"Renk dönüşümü başlatılıyor...\nSeçilen Dönüşüm: {hedefUzay}");
-                        break;
-
-                    case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
-                        Bitmap kaynakResim = new Bitmap(picInput1.Image);
-
-                        if (rbNoiseAdd.Checked) // EKLEME
-                        {
-                            if (cmbNoiseAdd.SelectedItem != null)
+                            if (secimHist == "Histogram Tablosu")
                             {
-                                string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
-                                int oran = trkNoisePercentage.Value; // YENİ: Arayüzden oranı çekiyoruz
-
-                                // Türü ve Oranı metoda gönderiyoruz
-                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, oran, gurultuTuru);
+                                // Sadece histogrami goster, cikis resmini ellemeyelim
+                                picHistogramResult.Image = null;
                             }
-                        }
-                        else // TEMİZLEME
-                        {
-                            if (cmbNoiseRemove.SelectedItem != null && cmbNoiseMatrixSize.SelectedItem != null)
+                            else
                             {
-                                string filtreTuru = cmbNoiseRemove.SelectedItem.ToString();
+                                Bitmap cikisHist;
+                                if (secimHist == "Histogram Germe")
+                                    cikisHist = PikselIslem.HistogramGerme(srcH);
+                                else if (secimHist == "Histogram Genişletme")
+                                    cikisHist = PikselIslem.HistogramGenisletme(srcH);
+                                else // "Histogram Eşitleme"
+                                    cikisHist = PikselIslem.HistogramEsitleme(srcH);
 
-                                // "5x5" gibi bir string'den '5' rakamını alıyoruz
-                                int matrisBoyutu = int.Parse(cmbNoiseMatrixSize.SelectedItem.ToString().Split('x')[0]);
+                                picOutput.Image = cikisHist;
 
-                                if (filtreTuru == "Mean Filtresi")
-                                {
-                                    picOutput.Image = ImageProcessor.ApplyMeanFilter(kaynakResim, matrisBoyutu);
-                                }
-                                else if (filtreTuru == "Median Filtresi")
-                                {
-                                    picOutput.Image = ImageProcessor.ApplyMedianFilter(kaynakResim, matrisBoyutu);
-                                }
+                                // Cikis histogramini da yan tuvale cizdirelim
+                                int[] histYeni = PikselIslem.HistogramHesapla(new Bitmap(cikisHist));
+                                picHistogramResult.Image = PikselIslem.HistogramCiz(histYeni);
                             }
+                            break;
                         }
-                        break;
-
-                    case "Eşikleme işlemleri (Tek Eşikleme)":
-                        Bitmap srcThreshold = new Bitmap(picInput1.Image);
-
-                        if (rbStaticThreshold.Checked)
-                        {
-                            // Statik eşikleme
-                            int esik = trkTreshold2.Value;
-                            picOutput.Image = ImageProcessor.ApplyStaticThreshold(srcThreshold, esik);
-                        }
-                        else
-                        {
-                            // Dinamik (Adaptif) eşikleme - Combobox'tan boyutu sayı olarak ayıklıyoruz
-                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); // Örn: "5x5"
-                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); // "5" rakamını alır
-
-                            picOutput.Image = ImageProcessor.ApplyDynamicThreshold(srcThreshold, matrisBoyutu);
-                        }
-                        break;
 
                     case "İki Resim Arasında Aritmetik İşlemler (ekleme, bölme)":
 
@@ -377,6 +410,158 @@ namespace ImageProcessingProject
                             MessageBox.Show("Hata: İşlem yapılacak resimlerin boyutları (Genişlik ve Yükseklik) birebir aynı olmalıdır!", "Boyut Uyuşmazlığı", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
 
+                        break;
+
+
+                    case "Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)":
+                        Bitmap srcMorph = new(picInput1.Image);
+                        string islemTuru = cmbMorphologyType.SelectedItem.ToString();
+
+                        // 1. Arayüzden değerleri dinamik olarak çekiyoruz
+                        int mBoyut = int.Parse(cmbMorphMatrixSize.SelectedItem.ToString().Substring(0, 1));
+                        string mSekil = cmbMorphShape.SelectedItem.ToString();
+
+                        // 2. İşlemleri çağırırken bu 3 bilgiyi (resim, boyut, şekil) gönderiyoruz
+                        if (islemTuru == "Genişleme (Dilation)")
+                        {
+                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "Aşınma (Erosion)")
+                        {
+                            picOutput.Image = GoruntuIslem.Asinma(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "Açma (Opening)")
+                        {
+                            picOutput.Image = GoruntuIslem.Acma(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "Kapama (Closing)")
+                        {
+                            picOutput.Image = GoruntuIslem.Kapama(srcMorph, mBoyut, mSekil);
+                        }
+                        break;
+
+                    case "Görüntüye Filtre Uygulanması (Unsharp)":
+                        if (picInput1.Image != null)
+                        {
+                            // 1. Resmi al
+                            Bitmap girisResmi = new Bitmap(picInput1.Image);
+
+                            // 2. Filtreyi uygula (1.5 keskinlik seviyesi - istersen değiştirebilirsin)
+                            Bitmap sonucResmi = GoruntuIslem.UnsharpMask(girisResmi, 1.5);
+
+                            // 3. Sonucu ekrana yansıt
+                            picOutput.Image = sonucResmi;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Lütfen işlemi uygulamak için bir resim yükleyin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        break;
+
+
+                    case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
+                        Bitmap srcPrewitt = new Bitmap(picInput1.Image);
+                        string secilenYon = cmbEdgeType.SelectedItem.ToString();
+
+                        // Kenar bulma filtresini uygula
+                        picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
+                        break;
+
+                    case "Konvolüsyon İşlemi (mean)":
+                        {
+                            if (cmbMatrixSize.SelectedItem == null)
+                            {
+                                MessageBox.Show("Lütfen matris boyutunu seçiniz (3x3, 5x5, 7x7).", "Bilgi");
+                                return;
+                            }
+
+                            Bitmap srcK = new Bitmap(picInput1.Image);
+                            int boyutK = int.Parse(cmbMatrixSize.SelectedItem.ToString().Split('x')[0]);
+                            picOutput.Image = PikselIslem.MeanKonvolusyon(srcK, boyutK);
+                            break;
+                        }
+
+                    case "Renk Uzayı Dönüşümleri":
+                        {
+                            if (cmbColorSpace.SelectedItem == null)
+                            {
+                                MessageBox.Show("Lütfen bir renk uzayı dönüşümü seçiniz.", "Bilgi");
+                                return;
+                            }
+
+                            Bitmap srcRu = new Bitmap(picInput1.Image);
+                            string hedefUzay = cmbColorSpace.SelectedItem.ToString();
+
+                            if (hedefUzay == "RGB -> HSV")
+                                picOutput.Image = PikselIslem.RgbToHsv(srcRu);
+                            else if (hedefUzay == "RGB -> YCbCr")
+                                picOutput.Image = PikselIslem.RgbToYCbCr(srcRu);
+                            else if (hedefUzay == "RGB -> CMYK")
+                                picOutput.Image = PikselIslem.RgbToCmyk(srcRu);
+                            else if (hedefUzay == "RGB -> Gri (Luminance)")
+                                picOutput.Image = PikselIslem.RgbToGri(srcRu);
+                            else
+                                MessageBox.Show("Bu dönüşüm henüz desteklenmiyor: " + hedefUzay, "Bilgi");
+                            break;
+                        }
+
+                    case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
+                        Bitmap kaynakResim = new Bitmap(picInput1.Image);
+
+                        if (rbNoiseAdd.Checked) // EKLEME
+                        {
+                            if (cmbNoiseAdd.SelectedItem != null)
+                            {
+                                string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
+                                
+                                int oran = trkNoisePercentage.Value; 
+
+                                // Türü ve Oranı metoda gönderiyoruz
+                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, oran, gurultuTuru);
+                            }
+                        }
+                        else // TEMİZLEME
+                        {
+                            if (cmbNoiseRemove.SelectedItem != null && cmbNoiseMatrixSize.SelectedItem != null)
+                            {
+                                string filtreTuru = cmbNoiseRemove.SelectedItem.ToString();
+
+                                // "5x5" gibi bir string'den '5' rakamını alıyoruz
+                                int matrisBoyutu = int.Parse(cmbNoiseMatrixSize.SelectedItem.ToString().Split('x')[0]);
+
+                                if (filtreTuru == "Mean Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMeanFilter(kaynakResim, matrisBoyutu);
+                                }
+                                else if (filtreTuru == "Median Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMedianFilter(kaynakResim, matrisBoyutu);
+                                }
+                            }
+                        }
+                        break;
+
+                    case "Eşikleme işlemleri (Tek Eşikleme)":
+                        Bitmap srcThreshold = new Bitmap(picInput1.Image);
+
+                        if (rbStaticThreshold.Checked)
+                        {
+                            // Statik eşikleme
+                            int esik = trkTreshold2.Value;
+                            picOutput.Image = ImageProcessor.ApplyStaticThreshold(srcThreshold, esik);
+                        }
+                        else
+                        {
+                            // Dinamik (Adaptif) eşikleme - Combobox'tan boyutu sayı olarak ayıklıyoruz
+                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); // Örn: "5x5"
+                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); // "5" rakamını alır
+
+                            picOutput.Image = ImageProcessor.ApplyDynamicThreshold(srcThreshold, matrisBoyutu);
+                        }
+                        break;
+
+                    default:
+                        MessageBox.Show("Bu işlem henüz kodlanmadı.");
                         break;
                 }
             }
@@ -438,6 +623,7 @@ namespace ImageProcessingProject
                 numNoisePercentage.Enabled = true; // Sayı kutusu aktif
 
                 cmbNoiseRemove.Enabled = false;
+                cmbNoiseMatrixSize.Enabled = false; // Eklemede matris kutusu kapalı
                 cmbNoiseMatrixSize.Enabled = false;
             }
             else
@@ -447,6 +633,7 @@ namespace ImageProcessingProject
                 numNoisePercentage.Enabled = false; // Sayı kutusu pasif
 
                 cmbNoiseRemove.Enabled = true;
+                cmbNoiseMatrixSize.Enabled = true; // Temizlemede matris kutusu açık
                 cmbNoiseMatrixSize.Enabled = true;
             }
         }
@@ -613,6 +800,7 @@ namespace ImageProcessingProject
             // İleride histogram seçimi değiştiğinde anlık bir şey yapmak istersen burayı kullanabilirsin.
         }
 
+        // Trackbar kaydırıldığında sayıyı değiştirir
         // 1. TrackBar (Kaydırma Çubuğu) değiştiğinde
         private void TrkTreshold2_ValueChanged(object sender, EventArgs e)
         {
@@ -623,6 +811,9 @@ namespace ImageProcessingProject
             }
         }
 
+               
+
+        // Sayı kutusuna rakam yazıldığında Trackbar'ı o hizaya kaydırır
         // 2. NumericUpDown (Sayı Kutusu) değiştiğinde
         private void NumThreshold_ValueChanged(object sender, EventArgs e)
         {

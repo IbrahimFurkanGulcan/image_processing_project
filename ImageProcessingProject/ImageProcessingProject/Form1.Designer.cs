@@ -27,6 +27,7 @@
             tableLayoutPanel1 = new TableLayoutPanel();
             picInput1 = new PictureBox();
             picInput2 = new PictureBox();
+            pnlOutputContainer = new Panel();
             picOutput = new PictureBox();
             pnlMasterParametre = new Panel();
             pnlHistogram = new Panel();
@@ -251,7 +252,7 @@
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33334F));
             tableLayoutPanel1.Controls.Add(picInput1, 0, 0);
             tableLayoutPanel1.Controls.Add(picInput2, 1, 0);
-            tableLayoutPanel1.Controls.Add(picOutput, 2, 0);
+            tableLayoutPanel1.Controls.Add(pnlOutputContainer, 2, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Margin = new Padding(4, 5, 4, 5);
@@ -288,14 +289,27 @@
             // 
             // picOutput
             // 
-            picOutput.BorderStyle = BorderStyle.FixedSingle;
-            picOutput.Dock = DockStyle.Fill;
-            picOutput.Location = new Point(847, 30);
-            picOutput.Margin = new Padding(4, 5, 4, 5);
+            // // pnlOutputContainer (KAYDIRILABİLİR PANEL) // 
+            pnlOutputContainer.AutoScroll = true; // Resim büyüyünce çubukları çıkarır
+            pnlOutputContainer.BorderStyle = BorderStyle.FixedSingle;
+            pnlOutputContainer.Dock = DockStyle.Fill;
+            pnlOutputContainer.Location = new Point(847, 30);
+            pnlOutputContainer.Margin = new Padding(4, 5, 4, 5);
+            pnlOutputContainer.Name = "pnlOutputContainer";
+            pnlOutputContainer.Size = new Size(405, 687);
+            pnlOutputContainer.TabIndex = 2;
+            // Panelin içine asıl resim kutumuzu yerleştiriyoruz
+            pnlOutputContainer.Controls.Add(picOutput);
+
+            // // picOutput  // 
+            picOutput.BorderStyle = BorderStyle.None; // Çerçeveyi panele verdiğimiz için buradan sildik
+            picOutput.Dock = DockStyle.None; // Fill İPTAL: Artık kutuya yapışık değil, serbest
+            picOutput.Location = new Point(0, 0);
+            picOutput.Margin = new Padding(0);
             picOutput.Name = "picOutput";
             picOutput.Size = new Size(405, 687);
-            picOutput.SizeMode = PictureBoxSizeMode.Zoom;
-            picOutput.TabIndex = 2;
+            picOutput.SizeMode = PictureBoxSizeMode.AutoSize; // Gelen resmin orijinal pikseli kadar büyür
+            picOutput.TabIndex = 0;
             picOutput.TabStop = false;
             // 
             // pnlMasterParametre
@@ -1387,5 +1401,6 @@
         private System.Windows.Forms.ComboBox cmbHistogram;
         private System.Windows.Forms.Button btnUygula;
         private System.Windows.Forms.Label esikdegerLabel;
+        private Panel pnlOutputContainer;
     }
 }
