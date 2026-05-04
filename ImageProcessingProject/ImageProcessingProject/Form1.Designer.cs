@@ -186,7 +186,7 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(427, 1296);
             treeView1.TabIndex = 0;
-            treeView1.AfterSelect += treeView1_AfterSelect;
+            treeView1.AfterSelect += TreeView1_AfterSelect;
             // 
             // menuStrip1
             // 
@@ -211,7 +211,7 @@
             resimYükleToolStripMenuItem1.Name = "resimYükleToolStripMenuItem1";
             resimYükleToolStripMenuItem1.Size = new Size(253, 34);
             resimYükleToolStripMenuItem1.Text = "Resim Yükle";
-            resimYükleToolStripMenuItem1.Click += resimYükleToolStripMenuItem1_Click;
+            resimYükleToolStripMenuItem1.Click += ResimYükleToolStripMenuItem1_Click;
             // 
             // ikinciResmiYükleToolStripMenuItem
             // 
@@ -525,7 +525,7 @@
             rbNoiseAdd.TabIndex = 4;
             rbNoiseAdd.TabStop = true;
             rbNoiseAdd.Text = "Gürültü Ekle";
-            rbNoiseAdd.CheckedChanged += rbNoise_CheckedChanged;
+            rbNoiseAdd.CheckedChanged += RbNoise_CheckedChanged;
             // 
             // rbNoiseRemove
             // 
@@ -536,7 +536,7 @@
             rbNoiseRemove.Size = new Size(171, 29);
             rbNoiseRemove.TabIndex = 5;
             rbNoiseRemove.Text = "Gürültü Temizle";
-            rbNoiseRemove.CheckedChanged += rbNoise_CheckedChanged;
+            rbNoiseRemove.CheckedChanged += RbNoise_CheckedChanged;
             // 
             // lblNoiseAdd
             // 
@@ -636,7 +636,7 @@
             rbStaticThreshold.TabIndex = 2;
             rbStaticThreshold.TabStop = true;
             rbStaticThreshold.Text = "Statik Eşikleme";
-            rbStaticThreshold.CheckedChanged += rbThreshold_CheckedChanged;
+            rbStaticThreshold.CheckedChanged += RbThreshold_CheckedChanged;
             // 
             // rbDynamicThreshold
             // 
@@ -647,7 +647,7 @@
             rbDynamicThreshold.Size = new Size(186, 29);
             rbDynamicThreshold.TabIndex = 3;
             rbDynamicThreshold.Text = "Dinamik Eşikleme";
-            rbDynamicThreshold.CheckedChanged += rbThreshold_CheckedChanged;
+            rbDynamicThreshold.CheckedChanged += RbThreshold_CheckedChanged;
             // 
             // esikdegerLabel
             // 
@@ -1213,7 +1213,7 @@
             btnUygula.TabIndex = 9;
             btnUygula.Text = "İŞLEMİ UYGULA";
             btnUygula.UseVisualStyleBackColor = true;
-            btnUygula.Click += btnUygula_Click;
+            btnUygula.Click += BtnUygula_Click;
             // 
             // Form1
             // 
