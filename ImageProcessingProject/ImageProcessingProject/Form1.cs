@@ -242,9 +242,9 @@ namespace ImageProcessingProject
                         Bitmap srcMorph = new(picInput1.Image);
                         string islemTuru = cmbMorphologyType.SelectedItem.ToString();
 
-                        // 1. Matris boyutu ve şeklini şimdilik sabitliyoruz (Hata vermemesi için)
-                        int mBoyut = 3;
-                        string mSekil = "Kare";
+                        // 1. Arayüzden değerleri dinamik olarak çekiyoruz
+                        int mBoyut = int.Parse(cmbMorphMatrixSize.SelectedItem.ToString().Substring(0, 1));
+                        string mSekil = cmbMorphShape.SelectedItem.ToString();
 
                         // 2. İşlemleri çağırırken bu 3 bilgiyi (resim, boyut, şekil) gönderiyoruz
                         if (islemTuru == "Genişleme (Dilation)")
@@ -382,6 +382,24 @@ namespace ImageProcessingProject
                             MessageBox.Show("Hata: İşlem yapılacak resimlerin boyutları (Genişlik ve Yükseklik) birebir aynı olmalıdır!", "Boyut Uyuşmazlığı", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
 
+                        break;
+                   
+                    case "Görüntüye Filtre Uygulanması (Unsharp)":
+                        if (picInput1.Image != null)
+                        {
+                            // 1. Resmi al
+                            Bitmap girisResmi = new Bitmap(picInput1.Image);
+
+                            // 2. Filtreyi uygula (1.5 keskinlik seviyesi - istersen değiştirebilirsin)
+                            Bitmap sonucResmi = GoruntuIslem.UnsharpMask(girisResmi, 1.5);
+
+                            // 3. Sonucu ekrana yansıt
+                            picOutput.Image = sonucResmi;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Lütfen işlemi uygulamak için bir resim yükleyin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                         break;
                 }
             }
