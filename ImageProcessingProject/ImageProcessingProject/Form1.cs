@@ -390,7 +390,7 @@ namespace ImageProcessingProject
                             // 1. Resmi al
                             Bitmap girisResmi = new Bitmap(picInput1.Image);
 
-                            // 2. Filtreyi uygula (1.5 keskinlik seviyesi - istersen değiştirebilirsin)
+                            // 2. Filtreyi uygula 
                             Bitmap sonucResmi = GoruntuIslem.UnsharpMask(girisResmi, 1.5);
 
                             // 3. Sonucu ekrana yansıt
