@@ -462,8 +462,7 @@ namespace ImageProcessingProject
                     case "Kenar Bulma Algoritmalarının Kullanımı (prewitt)":
                         Bitmap srcPrewitt = new Bitmap(picInput1.Image);
                         string secilenYon = cmbEdgeType.SelectedItem.ToString();
-
-                        // Kenar bulma filtresini uygula
+                        
                         picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
                         break;
 
@@ -508,25 +507,24 @@ namespace ImageProcessingProject
                     case "Gürültü Ekleme (Salt&Pepper)/Temizleme (mean, median)":
                         Bitmap kaynakResim = new Bitmap(picInput1.Image);
 
-                        if (rbNoiseAdd.Checked) // EKLEME
+                        if (rbNoiseAdd.Checked) // Ekleme
                         {
                             if (cmbNoiseAdd.SelectedItem != null)
                             {
                                 string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
                                 
                                 int oran = trkNoisePercentage.Value; 
-
-                                // Türü ve Oranı metoda gönderiyoruz
+                                
                                 picOutput.Image = ImageProcessor.AddNoise(kaynakResim, oran, gurultuTuru);
                             }
                         }
-                        else // TEMİZLEME
+                        else // Temizleme
                         {
                             if (cmbNoiseRemove.SelectedItem != null && cmbNoiseMatrixSize.SelectedItem != null)
                             {
                                 string filtreTuru = cmbNoiseRemove.SelectedItem.ToString();
 
-                                // "5x5" gibi bir string'den '5' rakamını alıyoruz
+                                // Matris box ındaki stringten değeri çekiyoruz parse ederek: 5x5->5
                                 int matrisBoyutu = int.Parse(cmbNoiseMatrixSize.SelectedItem.ToString().Split('x')[0]);
 
                                 if (filtreTuru == "Mean Filtresi")
@@ -552,9 +550,9 @@ namespace ImageProcessingProject
                         }
                         else
                         {
-                            // Dinamik (Adaptif) eşikleme - Combobox'tan boyutu sayı olarak ayıklıyoruz
-                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); // Örn: "5x5"
-                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); // "5" rakamını alır
+                            // Dinamik (Adaptif) eşikleme - Gürültü temizlemedeki gibi: 5x5->5
+                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); 
+                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); 
 
                             picOutput.Image = ImageProcessor.ApplyDynamicThreshold(srcThreshold, matrisBoyutu);
                         }

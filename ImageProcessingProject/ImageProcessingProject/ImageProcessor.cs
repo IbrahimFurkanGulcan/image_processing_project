@@ -7,23 +7,24 @@ namespace ImageProcessingProject
 {
     public static class ImageProcessor
     {
-        // Tüm işlemlerde kullanacağımız, resmi 32bit formatına çeviren güvenlik kalkanımız
+        // Tüm işlemlerde kullanacağımız, resmi 32bit formatına çeviren fonksiyon
         // Bu sayede Stride (satır sonu boşlukları) hesaplamalarıyla uğraşmayız.
         private static Bitmap Get32BppImage(Bitmap original)
         {
-            // Yeni resmi orijinalin boyutuyla oluşturuyoruz
+            // Yeni resmi orijinalin boyutuyla oluşturuyoruz.
             Bitmap bmp = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
 
-            // C#'ın resmi kendi kafasına göre büyütüp küçültmesini (DPI Bug) engelle
+            // C#'ın resmi kendi kafasına göre büyütüp küçültmesini engelle.
             bmp.SetResolution(original.HorizontalResolution, original.VerticalResolution);
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
-                // Kaliteyi bozmadan ve pikselleri kaydırmadan 1'e 1 kopyalama (Interpolation kapatıldı)
+                // Kaliteyi bozmadan ve pikselleri kaydırmadan 1'e 1 kopyalama. 
                 g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                // InterpolationMode kullanılmıyor ama ileride sclae işlemleri için default olarak ayarlandı.
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
-                // Kaynak ve hedef dikdörtgeni tam olarak eşitliyoruz                         
+                // Kaynak ve hedef dikdörtgeni tam olarak eşitliyoruz.                         
                 g.DrawImage(original,
                     new Rectangle(0, 0, bmp.Width, bmp.Height),
                     new Rectangle(0, 0, original.Width, original.Height),
@@ -32,7 +33,7 @@ namespace ImageProcessingProject
                 //Bitmap clone = original.Clone(
                 //  new Rectangle(0, 0, original.Width, original.Height),
                 //PixelFormat.Format32bppArgb);
-                //daha kısa yol ama scale olursa çalışmaz
+                //daha kısa yol ama scale olursa çalışmaz.
             }
             return bmp;
         }
@@ -121,7 +122,7 @@ namespace ImageProcessingProject
                             for (int kx = -offset; kx <= offset; kx++)
                             {
                                 int nx = x + kx;
-                                if (nx < 0 || nx >= width) continue; // Resmin dışına çıkmayı engelle
+                                if (nx < 0 || nx >= width) continue; 
 
                                 int idx = (ny * stride) + (nx * 4);
                                 sumB += src[idx];
@@ -286,10 +287,10 @@ namespace ImageProcessingProject
                         if (magnitude < 0) magnitude = 0;
 
                         int resIdx = (y * stride) + (x * 4);
-                        res[resIdx] = (byte)magnitude;     // B
-                        res[resIdx + 1] = (byte)magnitude; // G
-                        res[resIdx + 2] = (byte)magnitude; // R
-                        res[resIdx + 3] = 255;             // A
+                        res[resIdx] = (byte)magnitude;     
+                        res[resIdx + 1] = (byte)magnitude; 
+                        res[resIdx + 2] = (byte)magnitude; 
+                        res[resIdx + 3] = 255;             
                     }
                 }
             }
