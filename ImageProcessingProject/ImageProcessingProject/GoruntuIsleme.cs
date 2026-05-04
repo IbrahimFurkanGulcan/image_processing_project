@@ -118,8 +118,7 @@ namespace ImageProcessingProject
                     Color renk1 = resim1.GetPixel(x, y);
                     Color renk2 = resim2.GetPixel(x, y);
 
-                    // DİKKAT: Çarpma işleminde renkler çok hızlı 255'i aşar ve resim bembeyaz olur.
-                    // Bu yüzden Photoshop'taki "Multiply" (Çoğalt) mantığıyla 255'e bölerek normalize ediyoruz.
+               
                     int r = (renk1.R * renk2.R) / 255;
                     int g = (renk1.G * renk2.G) / 255;
                     int b = (renk1.B * renk2.B) / 255;
@@ -162,8 +161,7 @@ namespace ImageProcessingProject
                     // 4. ÖZEL (CUSTOM) KONTROLÜ
                     else if (sekil.Contains("Özel"))
                     {
-                        // Arayüzde özel bir çizim alanı yoksa, siyah ekran vermesin diye 
-                        // sadece merkezi 1 yapıyoruz (Görüntüyü değiştirmez, etkisiz elemandır).
+                        
                         if (i == merkez && j == merkez) matris[i, j] = 1;
                         else matris[i, j] = 0;
                     }
@@ -175,13 +173,13 @@ namespace ImageProcessingProject
         // --- 1. DİNAMİK VE HIZLI GENİŞLEME (DILATION) ---
         public static Bitmap Genisleme(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
-            // 1. Sonuç resmini 32-bit (ARGB) olarak oluşturuyoruz
+            
             Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height, PixelFormat.Format32bppArgb);
 
             int[,] matris = MatrisOlustur(matrisBoyutu, sekil);
             int offset = matrisBoyutu / 2;
 
-            // 2. İki resmi de 32-bit formatında kilitliyoruz ki hafıza kayması yaşanmasın
+           
             BitmapData srcData = kaynakResim.LockBits(new Rectangle(0, 0, kaynakResim.Width, kaynakResim.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData dstData = sonuc.LockBits(new Rectangle(0, 0, sonuc.Width, sonuc.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
@@ -189,23 +187,22 @@ namespace ImageProcessingProject
             {
                 byte* srcPtr = (byte*)srcData.Scan0;
                 byte* dstPtr = (byte*)dstData.Scan0;
-                int stride = srcData.Stride; // İkisi de 32-bit olduğu için stride (satır uzunluğu) tamamen aynıdır
+                int stride = srcData.Stride; 
 
-                // Döngüleri offset kadar içeriden başlatıyoruz ki taşma olmasın
+                
                 for (int y = offset; y < kaynakResim.Height - offset; y++)
                 {
                     for (int x = offset; x < kaynakResim.Width - offset; x++)
                     {
                         byte maxB = 0, maxG = 0, maxR = 0;
 
-                        // Arayüzden gelen matrise göre komşuluk taraması
                         for (int my = -offset; my <= offset; my++)
                         {
                             for (int mx = -offset; mx <= offset; mx++)
                             {
                                 if (matris[my + offset, mx + offset] == 1)
                                 {
-                                    // DİKKAT: 32-bit olduğu için "* 3" yerine "* 4" kullanıyoruz!
+                                    
                                     byte* piksel = srcPtr + ((y + my) * stride) + ((x + mx) * 4);
 
                                     if (piksel[0] > maxB) maxB = piksel[0];
@@ -215,12 +212,11 @@ namespace ImageProcessingProject
                             }
                         }
 
-                        // DİKKAT: 32-bit olduğu için "* 3" yerine "* 4" kullanıyoruz!
                         byte* sonucPiksel = dstPtr + (y * stride) + (x * 4);
                         sonucPiksel[0] = maxB;
                         sonucPiksel[1] = maxG;
                         sonucPiksel[2] = maxR;
-                        sonucPiksel[3] = 255; // KRİTİK NOKTA: Alpha (Saydamlık) kanalını 255 yapıyoruz ki simsiyah olmasın!
+                        sonucPiksel[3] = 255; 
                     }
                 }
             }
@@ -234,13 +230,12 @@ namespace ImageProcessingProject
         // --- 2. DİNAMİK VE HIZLI AŞINMA (EROSION) ---
         public static Bitmap Asinma(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
-            // 1. Sonuç resmini 32-bit (ARGB) olarak oluşturuyoruz
+            
             Bitmap sonuc = new Bitmap(kaynakResim.Width, kaynakResim.Height, PixelFormat.Format32bppArgb);
 
             int[,] matris = MatrisOlustur(matrisBoyutu, sekil);
             int offset = matrisBoyutu / 2;
 
-            // 2. İki resmi de 32-bit formatında kilitliyoruz ki hafıza kayması yaşanmasın
             BitmapData srcData = kaynakResim.LockBits(new Rectangle(0, 0, kaynakResim.Width, kaynakResim.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             BitmapData dstData = sonuc.LockBits(new Rectangle(0, 0, sonuc.Width, sonuc.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
@@ -250,12 +245,11 @@ namespace ImageProcessingProject
                 byte* dstPtr = (byte*)dstData.Scan0;
                 int stride = srcData.Stride;
 
-                // Döngüleri offset kadar içeriden başlatıyoruz ki taşma olmasın
                 for (int y = offset; y < kaynakResim.Height - offset; y++)
                 {
                     for (int x = offset; x < kaynakResim.Width - offset; x++)
                     {
-                        // Aşınma işlemi için başlangıç değerleri 255 (Beyaz) olmalı. (Mantığın harika!)
+                        
                         byte minB = 255, minG = 255, minR = 255;
 
                         for (int my = -offset; my <= offset; my++)
@@ -264,7 +258,7 @@ namespace ImageProcessingProject
                             {
                                 if (matris[my + offset, mx + offset] == 1)
                                 {
-                                    // DİKKAT: 32-bit olduğu için "* 3" yerine "* 4" kullanıyoruz!
+                                   
                                     byte* piksel = srcPtr + ((y + my) * stride) + ((x + mx) * 4);
 
                                     if (piksel[0] < minB) minB = piksel[0];
@@ -274,12 +268,11 @@ namespace ImageProcessingProject
                             }
                         }
 
-                        // DİKKAT: 32-bit olduğu için "* 3" yerine "* 4" kullanıyoruz!
                         byte* sonucPiksel = dstPtr + (y * stride) + (x * 4);
                         sonucPiksel[0] = minB;
                         sonucPiksel[1] = minG;
                         sonucPiksel[2] = minR;
-                        sonucPiksel[3] = 255; // KRİTİK NOKTA: Alpha (Saydamlık) kanalını 255 yapıyoruz!
+                        sonucPiksel[3] = 255; 
                     }
                 }
             }
@@ -290,7 +283,7 @@ namespace ImageProcessingProject
             return sonuc;
         }
 
-        // --- 3. AÇMA VE KAPAMA (Arayüzde Varsa) ---
+        // --- 3. AÇMA VE KAPAMA ---
         public static Bitmap Acma(Bitmap kaynakResim, int matrisBoyutu, string sekil)
         {
             // Aşınma + Genişleme
@@ -311,10 +304,8 @@ namespace ImageProcessingProject
             int genislik = kaynakResim.Width;
             int yukseklik = kaynakResim.Height;
 
-            // Sonuç için yeni bir bitmap oluşturuyoruz (24 bit hız için en iyisidir)
             Bitmap sonuc = new Bitmap(genislik, yukseklik, PixelFormat.Format24bppRgb);
 
-            // Her iki resmi de hafızaya kilitliyoruz (LockBits)
             BitmapData srcData = kaynakResim.LockBits(new Rectangle(0, 0, genislik, yukseklik), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             BitmapData dstData = sonuc.LockBits(new Rectangle(0, 0, genislik, yukseklik), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
 
@@ -322,7 +313,6 @@ namespace ImageProcessingProject
             byte* dstPtr = (byte*)dstData.Scan0;
             int stride = srcData.Stride;
 
-            // Resmin kenarlarından 1 piksel içeriden başlıyoruz (3x3 kernel için hata almamak adına)
             for (int y = 1; y < yukseklik - 1; y++)
             {
                 for (int x = 1; x < genislik - 1; x++)
@@ -362,7 +352,6 @@ namespace ImageProcessingProject
                 }
             }
 
-            // Hafıza kilidini kaldırıyoruz
             kaynakResim.UnlockBits(srcData);
             sonuc.UnlockBits(dstData);
 
