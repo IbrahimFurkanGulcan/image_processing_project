@@ -7,18 +7,47 @@ namespace ImageProcessingProject
 {
     public static class ImageProcessor
     {
+<<<<<<< HEAD
         private static Bitmap Get32BppImage(Bitmap original)
         {
             Bitmap bmp = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
+=======
+        // Tüm işlemlerde kullanacağımız, resmi 32bit formatına çeviren fonksiyon
+        // Bu sayede Stride (satır sonu boşlukları) hesaplamalarıyla uğraşmayız.
+        private static Bitmap Get32BppImage(Bitmap original)
+        {
+            // Yeni resmi orijinalin boyutuyla oluşturuyoruz.
+            Bitmap bmp = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
+
+            // C#'ın resmi kendi kafasına göre büyütüp küçültmesini engelle.
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
             bmp.SetResolution(original.HorizontalResolution, original.VerticalResolution);
             using (Graphics g = Graphics.FromImage(bmp))
             {
+<<<<<<< HEAD
+=======
+                // Kaliteyi bozmadan ve pikselleri kaydırmadan 1'e 1 kopyalama. 
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
                 g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                // InterpolationMode kullanılmıyor ama ileride sclae işlemleri için default olarak ayarlandı.
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+<<<<<<< HEAD
+=======
+
+                // Kaynak ve hedef dikdörtgeni tam olarak eşitliyoruz.                         
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
                 g.DrawImage(original,
                     new Rectangle(0, 0, bmp.Width, bmp.Height),
                     new Rectangle(0, 0, original.Width, original.Height),
                     GraphicsUnit.Pixel);
+<<<<<<< HEAD
+=======
+
+                //Bitmap clone = original.Clone(
+                //  new Rectangle(0, 0, original.Width, original.Height),
+                //PixelFormat.Format32bppArgb);
+                //daha kısa yol ama scale olursa çalışmaz.
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
             }
             return bmp;
         }
@@ -159,7 +188,12 @@ namespace ImageProcessingProject
                             for (int kx = -offset; kx <= offset; kx++)
                             {
                                 int nx = x + kx;
+<<<<<<< HEAD
                                 if (nx < 0 || nx >= width) continue;
+=======
+                                if (nx < 0 || nx >= width) continue; 
+
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
                                 int idx = (ny * stride) + (nx * 4);
                                 sumB += src[idx]; sumG += src[idx + 1]; sumR += src[idx + 2]; count++;
                             }
@@ -231,6 +265,7 @@ namespace ImageProcessingProject
                 {
                     for (int x = 1; x < width - 1; x++)
                     {
+<<<<<<< HEAD
                         int idx00 = ((y - 1) * stride) + ((x - 1) * 4), idx10 = ((y - 1) * stride) + (x * 4), idx20 = ((y - 1) * stride) + ((x + 1) * 4);
                         int idx01 = (y * stride) + ((x - 1) * 4), idx21 = (y * stride) + ((x + 1) * 4);
                         int idx02 = ((y + 1) * stride) + ((x - 1) * 4), idx12 = ((y + 1) * stride) + (x * 4), idx22 = ((y + 1) * stride) + ((x + 1) * 4);
@@ -243,6 +278,58 @@ namespace ImageProcessingProject
                         mag = Math.Min(255, Math.Max(0, mag));
                         int ri = (y * stride) + (x * 4);
                         res[ri] = (byte)mag; res[ri + 1] = (byte)mag; res[ri + 2] = (byte)mag; res[ri + 3] = 255;
+=======
+                        // 3x3 grid koordinatları hesaplaması
+                        int idx00 = ((y - 1) * stride) + ((x - 1) * 4);
+                        int idx10 = ((y - 1) * stride) + (x * 4);
+                        int idx20 = ((y - 1) * stride) + ((x + 1) * 4);
+
+                        int idx01 = (y * stride) + ((x - 1) * 4);
+                        int idx21 = (y * stride) + ((x + 1) * 4);
+
+                        int idx02 = ((y + 1) * stride) + ((x - 1) * 4);
+                        int idx12 = ((y + 1) * stride) + (x * 4);
+                        int idx22 = ((y + 1) * stride) + ((x + 1) * 4);
+
+                        // Piksellerin gri tonlarını (Luminance) hesaplıyoruz
+                        int g00 = (src[idx00] + src[idx00 + 1] + src[idx00 + 2]) / 3;
+                        int g10 = (src[idx10] + src[idx10 + 1] + src[idx10 + 2]) / 3;
+                        int g20 = (src[idx20] + src[idx20 + 1] + src[idx20 + 2]) / 3;
+
+                        int g01 = (src[idx01] + src[idx01 + 1] + src[idx01 + 2]) / 3;
+                        int g21 = (src[idx21] + src[idx21 + 1] + src[idx21 + 2]) / 3;
+
+                        int g02 = (src[idx02] + src[idx02 + 1] + src[idx02 + 2]) / 3;
+                        int g12 = (src[idx12] + src[idx12 + 1] + src[idx12 + 2]) / 3;
+                        int g22 = (src[idx22] + src[idx22 + 1] + src[idx22 + 2]) / 3;
+
+                        // Prewitt Gx (Yatay Kenarlar)
+                        int gx = (-1 * g00) + (1 * g20) +
+                                 (-1 * g01) + (1 * g21) +
+                                 (-1 * g02) + (1 * g22);
+
+                        // Prewitt Gy (Dikey Kenarlar)
+                        int gy = (1 * g00) + (1 * g10) + (1 * g20) +
+                                 (-1 * g02) + (-1 * g12) + (-1 * g22);
+
+                        int magnitude = 0;
+
+                        if (direction == "Yatay (Horizontal)")
+                            magnitude = Math.Abs(gx);
+                        else if (direction == "Dikey (Vertical)")
+                            magnitude = Math.Abs(gy);
+                        else
+                            magnitude = (int)Math.Sqrt((gx * gx) + (gy * gy)); // Her İkisi (Genlik)
+
+                        if (magnitude > 255) magnitude = 255;
+                        if (magnitude < 0) magnitude = 0;
+
+                        int resIdx = (y * stride) + (x * 4);
+                        res[resIdx] = (byte)magnitude;     
+                        res[resIdx + 1] = (byte)magnitude; 
+                        res[resIdx + 2] = (byte)magnitude; 
+                        res[resIdx + 3] = 255;             
+>>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
                     }
                 }
             }
@@ -309,5 +396,230 @@ namespace ImageProcessingProject
             result.UnlockBits(resData);
             return result;
         }
+        // ====================================================================
+        // KONTRAST ARTIRMA
+        // ====================================================================
+        public static Bitmap KontrastUygula(Bitmap original, int contrastValue)
+        {
+            Bitmap result = Get32BppImage(original);
+            BitmapData data = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.ReadWrite, result.PixelFormat);
+
+            double factor = (259.0 * (contrastValue + 255.0)) / (255.0 * (259.0 - contrastValue));
+
+            unsafe
+            {
+                byte* ptr = (byte*)data.Scan0;
+                int bytes = Math.Abs(data.Stride) * result.Height;
+
+                for (int i = 0; i < bytes; i += 4)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        int pixel = ptr[i + j];
+                        int newValue = (int)(factor * (pixel - 128) + 128);
+
+                        if (newValue > 255) newValue = 255;
+                        if (newValue < 0) newValue = 0;
+
+                        ptr[i + j] = (byte)newValue;
+                    }
+                }
+            }
+
+            result.UnlockBits(data);
+            return result;
+        }
+        // =========================================================================
+        // GÖRÜNTÜ DÖNDÜRME
+        // =========================================================================
+        public static Bitmap GoruntuDondur(Bitmap original, double angle, string method)
+        {
+            int w = original.Width;
+            int h = original.Height;
+            Bitmap result = new Bitmap(w, h);
+
+            double radyan = angle * Math.PI / 180.0;
+            double cosA = Math.Cos(radyan);
+            double sinA = Math.Sin(radyan);
+
+            // Merkeze göre döndürmek için merkez noktaları
+            double centerX = w / 2.0;
+            double centerY = h / 2.0;
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    // Yeni koordinatları hesapla (Tersine eşleme)
+                    double eskiX = cosA * (x - centerX) + sinA * (y - centerY) + centerX;
+                    double eskiY = -sinA * (x - centerX) + cosA * (y - centerY) + centerY;
+
+                    // Eğer hesaplanan nokta resmin içindeyse
+                    if (eskiX >= 0 && eskiX < w - 1 && eskiY >= 0 && eskiY < h - 1)
+                    {
+                        if (method == "Bilinear")
+                        {
+                            // BİLINEAR (Pürüzsüzleştirme)
+                            int x1 = (int)eskiX;
+                            int y1 = (int)eskiY;
+                            double farkX = eskiX - x1;
+                            double farkY = eskiY - y1;
+
+                            Color p1 = original.GetPixel(x1, y1);
+                            Color p2 = original.GetPixel(x1 + 1, y1);
+                            Color p3 = original.GetPixel(x1, y1 + 1);
+                            Color p4 = original.GetPixel(x1 + 1, y1 + 1);
+
+                            // Renk ortalaması hesapla
+                            int r = (int)(p1.R * (1 - farkX) * (1 - farkY) + p2.R * farkX * (1 - farkY) + p3.R * (1 - farkX) * farkY + p4.R * farkX * farkY);
+                            int g = (int)(p1.G * (1 - farkX) * (1 - farkY) + p2.G * farkX * (1 - farkY) + p3.G * (1 - farkX) * farkY + p4.G * farkX * farkY);
+                            int b = (int)(p1.B * (1 - farkX) * (1 - farkY) + p2.B * farkX * (1 - farkY) + p3.B * (1 - farkX) * farkY + p4.B * farkX * farkY);
+
+                            result.SetPixel(x, y, Color.FromArgb(r, g, b));
+                        }
+                        else
+                        {
+                            // NEAREST NEIGHBOR (En Yakın Komşu)
+                            int srcX = (int)Math.Round(eskiX);
+                            int srcY = (int)Math.Round(eskiY);
+
+                            if (srcX >= 0 && srcX < w && srcY >= 0 && srcY < h)
+                            {
+                                Color renk = original.GetPixel(srcX, srcY);
+                                result.SetPixel(x, y, renk);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        // =========================================================================
+        // GÖRÜNTÜ YAKLAŞTIRMA/UZAKLAŞTIRMA
+        // =========================================================================
+
+        // ImageProcessor.cs İçindeki Yeni Ölçekleme Metodu
+        public static Bitmap GoruntuOlcekle(Bitmap original, double oran, string interpolationMethod)
+        {
+            int yeniW = (int)(original.Width * oran);
+            int yeniH = (int)(original.Height * oran);
+
+            if (yeniW <= 0) yeniW = 1;
+            if (yeniH <= 0) yeniH = 1;
+
+            Bitmap result = new Bitmap(yeniW, yeniH);
+
+            // GetPixel yerine Graphics sınıfını kullanıyoruz (Çok daha hızlı ve kaliteli)
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                // Arayüzden gelen yönteme göre ölçekleme kalitesini belirliyoruz
+                if (interpolationMethod == "Bilinear")
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                }
+
+                else if (interpolationMethod == "Bicubic") // YENİ EKLENEN KISIM
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                }
+
+                else // Nearest Neighbor (En Yakın Komşu)
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half; // Piksellerin bulanıklaşmasını önler
+                }
+
+                // Resmi yeni boyutlarıyla çizdiriyoruz
+                g.DrawImage(original, 0, 0, yeniW, yeniH);
+            }
+
+            return result;
+        }
+
+        public static Bitmap ConvertToGrayscale(Bitmap original)
+        {
+            Bitmap source = Get32BppImage(original);
+            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            unsafe
+            {
+                byte* src = (byte*)srcData.Scan0;
+                byte* res = (byte*)resData.Scan0;
+                int stride = srcData.Stride;
+                for (int y = 0; y < source.Height; y++)
+                {
+                    for (int x = 0; x < source.Width; x++)
+                    {
+                        int idx = (y * stride) + (x * 4);
+                        byte gray = (byte)(0.299 * src[idx + 2] + 0.587 * src[idx + 1] + 0.114 * src[idx]);
+                        res[idx] = gray; res[idx + 1] = gray; res[idx + 2] = gray; res[idx + 3] = 255;
+                    }
+                }
+            }
+            source.UnlockBits(srcData);
+            result.UnlockBits(resData);
+            return result;
+        }
+
+        public static Bitmap ConvertToBinary(Bitmap original, int threshold)
+        {
+            Bitmap gray = ConvertToGrayscale(original);
+            Bitmap source = Get32BppImage(gray);
+            Bitmap result = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            unsafe
+            {
+                byte* src = (byte*)srcData.Scan0;
+                byte* res = (byte*)resData.Scan0;
+                int stride = srcData.Stride;
+                for (int y = 0; y < source.Height; y++)
+                {
+                    for (int x = 0; x < source.Width; x++)
+                    {
+                        int idx = (y * stride) + (x * 4);
+                        byte val = src[idx] > threshold ? (byte)255 : (byte)0;
+                        res[idx] = val; res[idx + 1] = val; res[idx + 2] = val; res[idx + 3] = 255;
+                    }
+                }
+            }
+            source.UnlockBits(srcData);
+            result.UnlockBits(resData);
+            return result;
+        }
+
+        public static Bitmap CropImage(Bitmap original, int x1, int y1, int x2, int y2)
+        {
+            Bitmap source = Get32BppImage(original);
+            x1 = Math.Max(0, x1); y1 = Math.Max(0, y1);
+            x2 = Math.Min(source.Width, x2); y2 = Math.Min(source.Height, y2);
+            int cropW = x2 - x1, cropH = y2 - y1;
+            if (cropW <= 0 || cropH <= 0) return source;
+            Bitmap result = new Bitmap(cropW, cropH, PixelFormat.Format32bppArgb);
+            BitmapData srcData = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData resData = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            unsafe
+            {
+                byte* src = (byte*)srcData.Scan0;
+                byte* res = (byte*)resData.Scan0;
+                int srcStride = srcData.Stride, resStride = resData.Stride;
+                for (int y = 0; y < cropH; y++)
+                {
+                    for (int x = 0; x < cropW; x++)
+                    {
+                        int si = ((y + y1) * srcStride) + ((x + x1) * 4);
+                        int ri = (y * resStride) + (x * 4);
+                        res[ri] = src[si]; res[ri + 1] = src[si + 1]; res[ri + 2] = src[si + 2]; res[ri + 3] = src[si + 3];
+                    }
+                }
+            }
+            source.UnlockBits(srcData);
+            result.UnlockBits(resData);
+            return result;
+        }
     }
+
+
 }
+
