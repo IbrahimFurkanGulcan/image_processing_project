@@ -361,7 +361,7 @@
             // cmbHistogram
             // 
             cmbHistogram.FormattingEnabled = true;
-            cmbHistogram.Items.AddRange(new object[] { "Histogram Tablosu", "Histogram Germe", "Histogram Eşitleme" });
+            cmbHistogram.Items.AddRange(new object[] { "Histogram Germe", "Histogram Genişletme" });
             cmbHistogram.Location = new Point(129, 40);
             cmbHistogram.Margin = new Padding(4, 5, 4, 5);
             cmbHistogram.Name = "cmbHistogram";
@@ -1209,7 +1209,7 @@
             // cmbColorSpace
             // 
             cmbColorSpace.FormattingEnabled = true;
-            cmbColorSpace.Items.AddRange(new object[] { "RGB -> HSV", "RGB -> YCbCr", "RGB -> CMYK", "RGB -> Gri (Luminance)" });
+            cmbColorSpace.Items.AddRange(new object[] { "RGB -> HSV", "HSV -> RGB", "RGB -> YCbCr", "YCbCr -> RGB", "RGB -> CMYK", "RGB -> Gri (Luminance)" });
             cmbColorSpace.Location = new Point(190, 40);
             cmbColorSpace.Margin = new Padding(4, 5, 4, 5);
             cmbColorSpace.Name = "cmbColorSpace";

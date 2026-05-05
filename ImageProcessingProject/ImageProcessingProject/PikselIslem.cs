@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace ImageProcessingProject
 {
@@ -7,10 +8,9 @@ namespace ImageProcessingProject
     //  - Histogram (hesap, cizim, germe, genisletme, esitleme)
     //  - Renk uzayi donusumleri (RGB <-> HSV, RGB <-> YCbCr, RGB -> Gri)
     //  - Konvolusyon (mean) ve genel kernel uygulayici
-    //
-    // Kural: hazir filtre/donusum cagirilmayacak, her sey piksel piksel.
-    // GetPixel/SetPixel kullaniyorum, mantik daha kolay oturuyor. Hizli olmasi
-    // gerekirse sonra LockBits'e tasiriz.  
+    
+
+    // Not: GetPixel/SetPixel kolay ama buyuk resimde yavas kalabilir.
     public static class PikselIslem
     {
         // -------- HISTOGRAM --------
@@ -19,6 +19,7 @@ namespace ImageProcessingProject
         public static int[] HistogramHesapla(Bitmap img)
         {
             int[] h = new int[256];
+            // 0..255 araliginda sayim yapiyoruz.
             for (int y = 0; y < img.Height; y++)
             {
                 for (int x = 0; x < img.Width; x++)
@@ -38,6 +39,7 @@ namespace ImageProcessingProject
             int[] hg = new int[256];
             int[] hb = new int[256];
 
+            // Kanallari ayri ayri say.
             for (int y = 0; y < img.Height; y++)
             {
                 for (int x = 0; x < img.Width; x++)
@@ -51,8 +53,7 @@ namespace ImageProcessingProject
             return (hr, hg, hb);
         }
 
-        // Histogrami cubuk grafik gibi cizip Bitmap olarak verir.
-        // (Bu sadece gorsellestirme, algoritma degil; matplotlib.bar gibi dusunulebilir.)
+        // Histogrami cubuk grafik gibi cizip Bitmap olarak verecek.
         public static Bitmap HistogramCiz(int[] hist, int W = 512, int H = 300)
         {
             Bitmap bmp = new Bitmap(W, H);
@@ -60,6 +61,7 @@ namespace ImageProcessingProject
             {
                 g.Clear(Color.White);
 
+                // Grafikte olceklemek icin max'i bul.
                 int max = 0;
                 for (int i = 0; i < 256; i++) if (hist[i] > max) max = hist[i];
                 if (max == 0) return bmp;
@@ -67,6 +69,7 @@ namespace ImageProcessingProject
                 float kg = (float)W / 256f;
                 for (int i = 0; i < 256; i++)
                 {
+                    // Yukseklik normalize.
                     float yk = (hist[i] / (float)max) * (H - 8);
                     g.FillRectangle(Brushes.Black, i * kg, H - yk, kg, yk);
                 }
@@ -75,47 +78,11 @@ namespace ImageProcessingProject
             return bmp;
         }
 
-        // R, G, B kanal histogramlarini ust uste yari saydam ciziyor (R kirmizi, G yesil, B mavi).
-        public static Bitmap HistogramCizRGB(int[] hr, int[] hg, int[] hb, int W = 512, int H = 300)
-        {
-            Bitmap bmp = new Bitmap(W, H);
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.Clear(Color.White);
 
-                int max = 0;
-                for (int i = 0; i < 256; i++)
-                {
-                    if (hr[i] > max) max = hr[i];
-                    if (hg[i] > max) max = hg[i];
-                    if (hb[i] > max) max = hb[i];
-                }
-                if (max == 0) return bmp;
-
-                float kg = (float)W / 256f;
-                using (Brush bR = new SolidBrush(Color.FromArgb(140, 220, 30, 30)))
-                using (Brush bG = new SolidBrush(Color.FromArgb(140, 30, 180, 30)))
-                using (Brush bB = new SolidBrush(Color.FromArgb(140, 30, 60, 220)))
-                {
-                    for (int i = 0; i < 256; i++)
-                    {
-                        float yR = (hr[i] / (float)max) * (H - 8);
-                        float yG = (hg[i] / (float)max) * (H - 8);
-                        float yB = (hb[i] / (float)max) * (H - 8);
-                        g.FillRectangle(bR, i * kg, H - yR, kg, yR);
-                        g.FillRectangle(bG, i * kg, H - yG, kg, yG);
-                        g.FillRectangle(bB, i * kg, H - yB, kg, yB);
-                    }
-                }
-                g.DrawRectangle(Pens.Gray, 0, 0, W - 1, H - 1);
-            }
-            return bmp;
-        }
-
-        // Klasik histogram germe.
-        // En koyu pikseli 0'a, en aciktakini 255'e tasiyip aralari linear yayiyoruz.
+   
+        // En koyu pikseli 0'a, en aciktakini 255'e taşıyıyarak  aralari linear yayiyoruz.
         // Formul: yeni = (eski - min) * 255 / (max - min)
-        // Renkli resimde her kanalin kendi min/max'ini buluyorum, boylece renk dengesi cok bozulmaz.
+        // renkli resimlerde renk dengesi bozulmasın diye her kanalin kendi min/max'ini buluyoruz.
         public static Bitmap HistogramGerme(Bitmap img)
         {
             int W = img.Width;
@@ -125,6 +92,7 @@ namespace ImageProcessingProject
             int gMin = 255, gMax = 0;
             int bMin = 255, bMax = 0;
 
+            // Lineer germe icin min/max bul.
             for (int y = 0; y < H; y++)
             {
                 for (int x = 0; x < W; x++)
@@ -147,6 +115,7 @@ namespace ImageProcessingProject
                 {
                     Color c = img.GetPixel(x, y);
 
+                    // Kanallari 0..255'e yay.
                     int r = ((c.R - rMin) * 255) / rRange;
                     int g = ((c.G - gMin) * 255) / gRange;
                     int b = ((c.B - bMin) * 255) / bRange;
@@ -161,10 +130,7 @@ namespace ImageProcessingProject
             return son;
         }
 
-        // Histogram genisletme: aslinda germenin daha "saglam" hali.
-        // Tek bir uc pikselin yuzunden butun streche cuvallamasin diye en koyu/en acik
-        // pikseli direkt almak yerine yuzdelik (ornegin %1 ile %99) noktalarini kullaniyoruz.
-        // Ondan sonrasi yine aynisi: linear olarak 0..255'e yay.
+        //  HİSTOGRAM GENİŞLETME
         public static Bitmap HistogramGenisletme(Bitmap img, double altYuzde = 1.0, double ustYuzde = 99.0)
         {
             int W = img.Width;
@@ -173,6 +139,7 @@ namespace ImageProcessingProject
 
             (int[] hr, int[] hg, int[] hb) = HistogramHesaplaRGB(img);
 
+            // Uclar yuzunden bozulmasin diye yuzdelik sinir aliyoruz.
             int rLo = YuzdelikBul(hr, toplam, altYuzde);
             int rHi = YuzdelikBul(hr, toplam, ustYuzde);
             int gLo = YuzdelikBul(hg, toplam, altYuzde);
@@ -205,12 +172,12 @@ namespace ImageProcessingProject
             return son;
         }
 
-        // Histogram dizisinde verilen yuzdeligi (mesela %1 ya da %99) bulur.
-        // Toplam pikselin yuzdesi kadar piksel toplanasiya kadar gri seviyeleri yukseltiyoruz.
+       
         private static int YuzdelikBul(int[] hist, int toplam, double yuzde)
         {
             int hedef = (int)(toplam * yuzde / 100.0);
             int kumul = 0;
+            // Kumulatif sayim.
             for (int i = 0; i < 256; i++)
             {
                 kumul += hist[i];
@@ -219,77 +186,7 @@ namespace ImageProcessingProject
             return 255;
         }
 
-        // Histogram esitleme. Kumulatif dagilim (CDF) ile her gri tonu yeniden esliyoruz.
-        // Formul:  T(i) = round( (CDF(i) - CDFmin) / (W*H - CDFmin) * 255 )
-        // Renkli resimde her kanal icin ayri LUT cikarip kanali ona gore ceviriyorum.
-        public static Bitmap HistogramEsitleme(Bitmap img)
-        {
-            int W = img.Width;
-            int H = img.Height;
-            int toplam = W * H;
-
-            (int[] hr, int[] hg, int[] hb) = HistogramHesaplaRGB(img);
-
-            byte[] lutR = LutUret(hr, toplam);
-            byte[] lutG = LutUret(hg, toplam);
-            byte[] lutB = LutUret(hb, toplam);
-
-            Bitmap son = new Bitmap(W, H);
-            for (int y = 0; y < H; y++)
-            {
-                for (int x = 0; x < W; x++)
-                {
-                    Color c = img.GetPixel(x, y);
-                    son.SetPixel(x, y, Color.FromArgb(lutR[c.R], lutG[c.G], lutB[c.B]));
-                }
-            }
-            return son;
-        }
-
-        // Tek kanalin histogramindan CDF cikarip 0..255 arasinda haritalama tablosu uretir.
-        private static byte[] LutUret(int[] hist, int toplamPiksel)
-        {
-            int[] cdf = new int[256];
-            cdf[0] = hist[0];
-            for (int i = 1; i < 256; i++)
-            {
-                cdf[i] = cdf[i - 1] + hist[i];
-            }
-
-            int cdfMin = 0;
-            for (int i = 0; i < 256; i++)
-            {
-                if (cdf[i] != 0) { cdfMin = cdf[i]; break; }
-            }
-
-            byte[] lut = new byte[256];
-            int payda = toplamPiksel - cdfMin;
-
-            // Tek tonlu resimde anlamli esitleme yok, identity ver
-            if (payda <= 0)
-            {
-                for (int i = 0; i < 256; i++) lut[i] = (byte)i;
-                return lut;
-            }
-
-            for (int i = 0; i < 256; i++)
-            {
-                double t = (cdf[i] - cdfMin) * 255.0 / payda;
-                int v = (int)(t + 0.5);
-                if (v < 0) v = 0; else if (v > 255) v = 255;
-                lut[i] = (byte)v;
-            }
-            return lut;
-        }
-
         // -------- RENK UZAYI --------
-        //
-        // C# Bitmap her zaman R, G, B kanali tutuyor; bu yuzden HSV ve YCbCr sonuclari
-        // direkt gosterilemez. Onlari da R/G/B yuvalarina paketliyorum:
-        //   HSV   -> R = H/360 * 255,  G = S * 255,  B = V * 255
-        //   YCbCr -> R = Y, G = Cb, B = Cr
-        // Geri donusumler de ayni paketlemeyi varsayiyor.
-
         public static Bitmap RgbToHsv(Bitmap img)
         {
             int W = img.Width;
@@ -301,6 +198,7 @@ namespace ImageProcessingProject
                 for (int x = 0; x < W; x++)
                 {
                     Color c = img.GetPixel(x, y);
+                    // 0..1'e cek.
                     double r = c.R / 255.0;
                     double g = c.G / 255.0;
                     double b = c.B / 255.0;
@@ -319,7 +217,7 @@ namespace ImageProcessingProject
                     double S = (mx == 0) ? 0 : delta / mx;
                     double Hh;
 
-                    // Renksiz (gri) durumda H tanimsiz; sifir verdik.
+                  
                     if (delta < 1e-9)
                     {
                         Hh = 0;
@@ -346,13 +244,14 @@ namespace ImageProcessingProject
                     if (sb_ < 0) sb_ = 0; else if (sb_ > 255) sb_ = 255;
                     if (vb_ < 0) vb_ = 0; else if (vb_ > 255) vb_ = 255;
 
+                    // R=H, G=S, B=V olarak yaziyoruz.
                     son.SetPixel(x, y, Color.FromArgb(hb_, sb_, vb_));
                 }
             }
             return son;
         }
 
-        // Girdi RgbToHsv'in formatinda olmali (R=H, G=S, B=V).
+  
         public static Bitmap HsvToRgb(Bitmap img)
         {
             int W = img.Width;
@@ -364,6 +263,7 @@ namespace ImageProcessingProject
                 for (int x = 0; x < W; x++)
                 {
                     Color c = img.GetPixel(x, y);
+                    // Girdi paketli HSV formatinda: R=H, G=S, B=V.
                     double Hh = (c.R / 255.0) * 360.0;
                     double S = c.G / 255.0;
                     double V = c.B / 255.0;
@@ -371,9 +271,7 @@ namespace ImageProcessingProject
                     double C = V * S;
                     double m = V - C;
 
-                    // X = C * (1 - |((H/60) mod 2) - 1|)
-                    // C# ' nin '%' operatoru negatif sonuc verebildigi icin
-                    // mod 2'yi Floor ile elden hesapliyorum.
+                 
                     double hp = Hh / 60.0;
                     double mod2 = hp - 2.0 * Math.Floor(hp / 2.0);
                     double X = C * (1.0 - Math.Abs(mod2 - 1.0));
@@ -400,7 +298,6 @@ namespace ImageProcessingProject
             return son;
         }
 
-        // RGB -> YCbCr (BT.601 katsayilari). Sonuc R<-Y, G<-Cb, B<-Cr seklinde paketlenir.
         public static Bitmap RgbToYCbCr(Bitmap img)
         {
             int W = img.Width;
@@ -414,6 +311,7 @@ namespace ImageProcessingProject
                     Color c = img.GetPixel(x, y);
                     double R = c.R, G = c.G, B = c.B;
 
+                    // BT.601 katsayilariyla Y (parlaklik) ve Cb/Cr (renk farki) hesaplanir.
                     double Y = 0.299 * R + 0.587 * G + 0.114 * B;
                     double Cb = 128.0 - 0.168736 * R - 0.331264 * G + 0.5 * B;
                     double Cr = 128.0 + 0.5 * R - 0.418688 * G - 0.081312 * B;
@@ -426,13 +324,14 @@ namespace ImageProcessingProject
                     if (cbi < 0) cbi = 0; else if (cbi > 255) cbi = 255;
                     if (cri < 0) cri = 0; else if (cri > 255) cri = 255;
 
+                    // YCbCr'yi paketliyoruz: R=Y, G=Cb, B=Cr.
                     son.SetPixel(x, y, Color.FromArgb(yy, cbi, cri));
                 }
             }
             return son;
         }
 
-        // Girdi RgbToYCbCr formatinda olmali (R=Y, G=Cb, B=Cr).
+        
         public static Bitmap YCbCrToRgb(Bitmap img)
         {
             int W = img.Width;
@@ -444,6 +343,7 @@ namespace ImageProcessingProject
                 for (int x = 0; x < W; x++)
                 {
                     Color c = img.GetPixel(x, y);
+                    // Girdi paketli YCbCr formatinda: R=Y, G=Cb, B=Cr.
                     double Y = c.R;
                     double Cb = c.G - 128.0;
                     double Cr = c.B - 128.0;
@@ -466,13 +366,7 @@ namespace ImageProcessingProject
             return son;
         }
 
-        // RGB -> CMYK. Standart formul:
-        //   K = 1 - max(R,G,B)/255
-        //   C = (1 - R/255 - K) / (1 - K)
-        //   M = (1 - G/255 - K) / (1 - K)
-        //   Y = (1 - B/255 - K) / (1 - K)
-        // Bitmap 3 kanal tuttugu icin C/M/Y'yi R/G/B yuvalarina, K'yi de Alpha'ya
-        // paketliyorum. Boylece K bilgisi kaybolmuyor, gorsel olarak da CMY kismi gozukuyor.
+        // RGB -> CMYK
         public static Bitmap RgbToCmyk(Bitmap img)
         {
             int W = img.Width;
@@ -484,6 +378,7 @@ namespace ImageProcessingProject
                 for (int x = 0; x < W; x++)
                 {
                     Color c = img.GetPixel(x, y);
+                    // CMYK icin once normalize (0..1) degerlerle calisiyoruz.
                     double R = c.R / 255.0;
                     double G = c.G / 255.0;
                     double B = c.B / 255.0;
@@ -495,7 +390,7 @@ namespace ImageProcessingProject
                     double K = 1.0 - mx;
                     double C, M, Y;
 
-                    // Tamamen siyah pikselde K=1 oluyor, bolme patlamasin diye kontrol
+                
                     if (K >= 0.999)
                     {
                         C = 0; M = 0; Y = 0;
@@ -518,15 +413,15 @@ namespace ImageProcessingProject
                     if (Yi < 0) Yi = 0; else if (Yi > 255) Yi = 255;
                     if (Ki < 0) Ki = 0; else if (Ki > 255) Ki = 255;
 
-                    // ARGB: A=K (255-Ki dersek "ne kadar siyah" tersine olur, sade tutuyorum: A = K)
+                   
+                    // CMYK'yi paketliyoruz: A=K, R=C, G=M, B=Y.
                     son.SetPixel(x, y, Color.FromArgb(Ki, Ci, Mi, Yi));
                 }
             }
             return son;
         }
 
-        // RGB -> Gri. Standart luminance agirligi (BT.601). (R+G+B)/3 ortalamasindan
-        // gozumuze daha dogru bir gri verir; uygulamasi da ayni kolaylikta.
+        // RGB -> Gri
         public static Bitmap RgbToGri(Bitmap img)
         {
             int W = img.Width;
@@ -548,10 +443,7 @@ namespace ImageProcessingProject
 
         // -------- KONVOLUSYON --------
 
-        // NxN kare kernel ile genel konvolusyon. Kenarlarda en yakin gecerli pikseli
-        // kopyaliyoruz (clamp), boylece dis cerceve karaya donmuyor.
-        // Formul:  O(x,y) = sum_{ky,kx}  K(ky,kx) * I(x+kx, y+ky)
-        public static Bitmap Konvolusyon(Bitmap img, double[,] kernel)
+        public static unsafe Bitmap Konvolusyon(Bitmap img, double[,] kernel)
         {
             int kSize = kernel.GetLength(0);
             if (kernel.GetLength(1) != kSize)
@@ -562,46 +454,79 @@ namespace ImageProcessingProject
             int off = kSize / 2;
             int W = img.Width;
             int H = img.Height;
-            Bitmap son = new Bitmap(W, H);
 
-            for (int y = 0; y < H; y++)
+            using (Bitmap src = new Bitmap(W, H, PixelFormat.Format32bppArgb))
             {
-                for (int x = 0; x < W; x++)
+                using (Graphics g = Graphics.FromImage(src))
                 {
-                    double sR = 0, sG = 0, sB = 0;
+                    // Kaynagi 32bpp'a aliyoruz ki pointer ile sabit formatta gezelim.
+                    g.DrawImage(img, 0, 0, W, H);
+                }
 
-                    for (int ky = -off; ky <= off; ky++)
+                Bitmap dst = new Bitmap(W, H, PixelFormat.Format32bppArgb);
+                Rectangle rect = new Rectangle(0, 0, W, H);
+                BitmapData srcData = src.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                BitmapData dstData = dst.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                try
+                {
+                    byte* srcBase = (byte*)srcData.Scan0;
+                    byte* dstBase = (byte*)dstData.Scan0;
+                    int srcStride = srcData.Stride;
+                    int dstStride = dstData.Stride;
+
+                    for (int y = 0; y < H; y++)
                     {
-                        int ny = y + ky;
-                        if (ny < 0) ny = 0;
-                        else if (ny >= H) ny = H - 1;
-
-                        for (int kx = -off; kx <= off; kx++)
+                        for (int x = 0; x < W; x++)
                         {
-                            int nx = x + kx;
-                            if (nx < 0) nx = 0;
-                            else if (nx >= W) nx = W - 1;
+                            double sR = 0, sG = 0, sB = 0;
 
-                            Color c = img.GetPixel(nx, ny);
-                            double k = kernel[ky + off, kx + off];
+                            for (int ky = -off; ky <= off; ky++)
+                            {
+                                int ny = y + ky;
+                                if (ny < 0) ny = 0;
+                                else if (ny >= H) ny = H - 1;
 
-                            sR += c.R * k;
-                            sG += c.G * k;
-                            sB += c.B * k;
+                                for (int kx = -off; kx <= off; kx++)
+                                {
+                                    int nx = x + kx;
+                                    if (nx < 0) nx = 0;
+                                    else if (nx >= W) nx = W - 1;
+
+                                    double k = kernel[ky + off, kx + off];
+                                    byte* p = srcBase + (ny * srcStride) + (nx * 4);
+                                    // Format32bppArgb: B,G,R,A
+                                    sB += p[0] * k;
+                                    sG += p[1] * k;
+                                    sR += p[2] * k;
+                                }
+                            }
+
+                            // Toplamlari byte araligina cekiyoruz (clamp).
+                            int r = (int)(sR + 0.5); if (r < 0) r = 0; else if (r > 255) r = 255;
+                            int g2 = (int)(sG + 0.5); if (g2 < 0) g2 = 0; else if (g2 > 255) g2 = 255;
+                            int b2 = (int)(sB + 0.5); if (b2 < 0) b2 = 0; else if (b2 > 255) b2 = 255;
+
+                            byte* outP = dstBase + (y * dstStride) + (x * 4);
+                            outP[0] = (byte)b2;
+                            outP[1] = (byte)g2;
+                            outP[2] = (byte)r;
+                            outP[3] = 255;
                         }
                     }
-
-                    int r = (int)(sR + 0.5); if (r < 0) r = 0; else if (r > 255) r = 255;
-                    int g = (int)(sG + 0.5); if (g < 0) g = 0; else if (g > 255) g = 255;
-                    int b = (int)(sB + 0.5); if (b < 0) b = 0; else if (b > 255) b = 255;
-
-                    son.SetPixel(x, y, Color.FromArgb(r, g, b));
                 }
+                finally
+                {
+                    src.UnlockBits(srcData);
+                    dst.UnlockBits(dstData);
+                }
+
+                return dst;
             }
-            return son;
         }
 
-        // Mean (ortalama) konvolusyon. NxN kernelin tum hucreleri 1/(N*N) oluyor.
+    
+        // MEAN (ORTALAMA) KONVOLUSYON
         public static Bitmap MeanKonvolusyon(Bitmap img, int boyut)
         {
             if (boyut < 3 || boyut % 2 == 0)

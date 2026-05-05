@@ -146,10 +146,30 @@ namespace ImageProcessingProject
                         break;
                     case "Renk Uzayı Dönüşümleri":
                         pnlColorSpace.Visible = true;
-                        if (cmbColorSpace.SelectedIndex == -1) cmbColorSpace.SelectedIndex = 0; // Varsayılan: RGB -> HSV
+                        RenkUzayiComboDoldur();
                         break;
                 }
             }
+        }
+
+        private static readonly string[] RenkUzayiSecenekleri =
+        {
+            "RGB -> HSV",
+            "HSV -> RGB",
+            "RGB -> YCbCr",
+            "YCbCr -> RGB",
+            "RGB -> CMYK",
+            "RGB -> Gri (Luminance)"
+        };
+
+        /// <summary>Designer/eski exe senkronu bozulmasın diye liste her açılışta kodla doldurulur.</summary>
+        private void RenkUzayiComboDoldur()
+        {
+            string onceki = cmbColorSpace.SelectedItem?.ToString();
+            cmbColorSpace.Items.Clear();
+            cmbColorSpace.Items.AddRange(RenkUzayiSecenekleri);
+            int idx = Array.IndexOf(RenkUzayiSecenekleri, onceki);
+            cmbColorSpace.SelectedIndex = idx >= 0 ? idx : 0;
         }
 
         // --- 3. EKRAN TEMİZLEME YARDIMCISI ---
@@ -334,29 +354,19 @@ namespace ImageProcessingProject
 
                             string secimHist = cmbHistogram.SelectedItem != null
                                 ? cmbHistogram.SelectedItem.ToString()
-                                : "Histogram Tablosu";
+                                : "Histogram Germe";
 
-                            if (secimHist == "Histogram Tablosu")
-                            {
-                                // Sadece histogrami goster, cikis resmini ellemeyelim
-                                picHistogramResult.Image = null;
-                            }
+                            Bitmap cikisHist;
+                            if (secimHist == "Histogram Genişletme")
+                                cikisHist = PikselIslem.HistogramGenisletme(srcH);
                             else
-                            {
-                                Bitmap cikisHist;
-                                if (secimHist == "Histogram Germe")
-                                    cikisHist = PikselIslem.HistogramGerme(srcH);
-                                else if (secimHist == "Histogram Genişletme")
-                                    cikisHist = PikselIslem.HistogramGenisletme(srcH);
-                                else // "Histogram Eşitleme"
-                                    cikisHist = PikselIslem.HistogramEsitleme(srcH);
+                                cikisHist = PikselIslem.HistogramGerme(srcH);
 
-                                picOutput.Image = cikisHist;
+                            picOutput.Image = cikisHist;
 
-                                // Cikis histogramini da yan tuvale cizdirelim
-                                int[] histYeni = PikselIslem.HistogramHesapla(new Bitmap(cikisHist));
-                                picHistogramResult.Image = PikselIslem.HistogramCiz(histYeni);
-                            }
+                            // Cikis histogramini da yan tuvale cizdirelim
+                            int[] histYeni = PikselIslem.HistogramHesapla(new Bitmap(cikisHist));
+                            picHistogramResult.Image = PikselIslem.HistogramCiz(histYeni);
                             break;
                         }
 
@@ -493,8 +503,12 @@ namespace ImageProcessingProject
 
                             if (hedefUzay == "RGB -> HSV")
                                 picOutput.Image = PikselIslem.RgbToHsv(srcRu);
+                            else if (hedefUzay == "HSV -> RGB")
+                                picOutput.Image = PikselIslem.HsvToRgb(srcRu);
                             else if (hedefUzay == "RGB -> YCbCr")
                                 picOutput.Image = PikselIslem.RgbToYCbCr(srcRu);
+                            else if (hedefUzay == "YCbCr -> RGB")
+                                picOutput.Image = PikselIslem.YCbCrToRgb(srcRu);
                             else if (hedefUzay == "RGB -> CMYK")
                                 picOutput.Image = PikselIslem.RgbToCmyk(srcRu);
                             else if (hedefUzay == "RGB -> Gri (Luminance)")
