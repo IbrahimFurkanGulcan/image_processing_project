@@ -1,0 +1,853 @@
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace ImageProcessingProject
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            CreateEdgeMatrixGrid();// Aray├╝z├╝ Form1.Designer.cs'den y├╝kler
+                                   // TrackBar kayd─▒─ƒ─▒nda say─▒y─▒ g├╝ncellemesi i├ºin:
+            trkTreshold2.ValueChanged += TrkTreshold2_ValueChanged;
+
+            // Say─▒ de─ƒi┼ƒti─ƒinde TrackBar'─▒ kayd─▒rmas─▒ i├ºin:
+            numThreshold.ValueChanged += NumThreshold_ValueChanged;
+
+            trkNoisePercentage.ValueChanged += TrkNoisePercentage_ValueChanged;
+            numNoisePercentage.ValueChanged += NumNoisePercentage_ValueChanged;
+
+            
+        }
+
+        private TextBox[,] morphMatrixTextBoxes;
+
+        // --- 1. FORM Y├£KLEND─░─₧─░NDE (MEN├£Y├£ DOLDUR) ---
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            treeView1.Nodes.Clear();
+
+            TreeNode nodeTemel = new TreeNode("Temel ─░┼ƒlemler");
+            nodeTemel.Nodes.Add("Gri D├╢n├╝┼ƒ├╝m");
+            nodeTemel.Nodes.Add("Binary D├╢n├╝┼ƒ├╝m");
+            treeView1.Nodes.Add(nodeTemel);
+
+            TreeNode nodeGeometrik = new TreeNode("Geometrik ─░┼ƒlemler");
+            nodeGeometrik.Nodes.Add("G├╢r├╝nt├╝ D├╢nd├╝rme");
+            nodeGeometrik.Nodes.Add("G├╢r├╝nt├╝ K─▒rpma");
+            nodeGeometrik.Nodes.Add("G├╢r├╝nt├╝ Yakla┼ƒt─▒rma/Uzakla┼ƒt─▒rma");
+            treeView1.Nodes.Add(nodeGeometrik);
+
+            TreeNode nodeGelistirme = new TreeNode("Geli┼ƒtirme");
+            nodeGelistirme.Nodes.Add("─░ki Resim Aras─▒nda Aritmetik ─░┼ƒlemler (ekleme, b├╢lme)");
+            nodeGelistirme.Nodes.Add("Histogram ─░┼ƒlemleri (germe/geni┼ƒletme)");
+            nodeGelistirme.Nodes.Add("Kontrast Art─▒rma");
+            treeView1.Nodes.Add(nodeGelistirme);
+
+            TreeNode nodeFiltreler = new TreeNode("Filtreler");
+            nodeFiltreler.Nodes.Add("E┼ƒikleme i┼ƒlemleri (Tek E┼ƒikleme)");
+            nodeFiltreler.Nodes.Add("G├╝r├╝lt├╝ Ekleme (Salt&Pepper)/Temizleme (mean, median)");
+            nodeFiltreler.Nodes.Add("Konvol├╝syon ─░┼ƒlemi (mean)");
+            nodeFiltreler.Nodes.Add("Morfolojik ─░┼ƒlemler (Geni┼ƒleme, A┼ƒ─▒nma, A├ºma, Kapama)");
+            nodeFiltreler.Nodes.Add("G├╢r├╝nt├╝ye Filtre Uygulanmas─▒ (Unsharp)");
+            nodeFiltreler.Nodes.Add("Kenar Bulma Algoritmalar─▒n─▒n Kullan─▒m─▒ (prewitt)");
+            treeView1.Nodes.Add(nodeFiltreler);
+
+            TreeNode nodeDiger = new TreeNode("Di─ƒer ─░┼ƒlemler");
+            nodeDiger.Nodes.Add("Renk Uzay─▒ D├╢n├╝┼ƒ├╝mleri");
+            treeView1.Nodes.Add(nodeDiger);
+
+            treeView1.ExpandAll();
+
+            // Program ilk a├º─▒ld─▒─ƒ─▒nda sa─ƒ alttaki panelleri gizle
+            PanelleriGizle();
+        }
+
+        // --- 2. MEN├£DEN ─░┼₧LEM SE├ç─░LD─░─₧─░NDE ---
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node.Nodes.Count == 0) // Sadece t─▒klanabilir alt ba┼ƒl─▒klarsa
+            {
+                PanelleriGizle(); // ├ûnce ekran─▒ temizle
+
+                switch (e.Node.Text)
+                {
+                    case "Binary D├╢n├╝┼ƒ├╝m":
+                        pnlBinary.Visible = true;
+                        break;
+                    case "G├╢r├╝nt├╝ D├╢nd├╝rme":
+                        pnlRotate.Visible = true;
+                        // ComboBox bo┼ƒ gelmesin
+                        if (cmbRotateInterpolation.SelectedIndex == -1) cmbRotateInterpolation.SelectedIndex = 1;
+                        break;
+                    case "G├╢r├╝nt├╝ K─▒rpma":
+                        pnlCrop.Visible = true;
+                        break;
+                    case "G├╢r├╝nt├╝ Yakla┼ƒt─▒rma/Uzakla┼ƒt─▒rma":
+                        pnlScale.Visible = true;
+                        if (cmbScaleInterpolation.SelectedIndex == -1) cmbScaleInterpolation.SelectedIndex = 1;
+                        break;
+                    case "─░ki Resim Aras─▒nda Aritmetik ─░┼ƒlemler (ekleme, b├╢lme)":
+                        pnlArithmetic.Visible = true;
+                        picInput2.Visible = true;
+                        // Tabloyu 3 e┼ƒit par├ºaya b├╢l (%33)
+                        tableLayoutPanel1.ColumnStyles[0].Width = 33.33f;
+                        tableLayoutPanel1.ColumnStyles[1].Width = 33.33f;
+                        tableLayoutPanel1.ColumnStyles[2].Width = 33.33f;
+                        break;
+                    case "Histogram ─░┼ƒlemleri (germe/geni┼ƒletme)":
+                        pnlHistogram.Visible = true;
+                        if (cmbHistogram.SelectedIndex == -1) cmbHistogram.SelectedIndex = 0;
+                        break;
+                    case "Kontrast Art─▒rma":
+                        pnlContrast.Visible = true;
+                        break;
+                    case "E┼ƒikleme i┼ƒlemleri (Tek E┼ƒikleme)":
+                        pnlThresholding.Visible = true;
+                        if (cmbThresholdMatrix.SelectedIndex == -1) cmbThresholdMatrix.SelectedIndex = 0;
+
+                        // Varsay─▒lan ayarlar─▒ tetikle
+                        rbStaticThreshold.Checked = true;
+                        rbThreshold_CheckedChanged(null, null);
+                        break;
+                    case "G├╝r├╝lt├╝ Ekleme (Salt&Pepper)/Temizleme (mean, median)":
+                        pnlNoise.Visible = true;
+                        if (cmbNoiseAdd.SelectedIndex == -1) cmbNoiseAdd.SelectedIndex = 0;
+                        if (cmbNoiseRemove.SelectedIndex == -1) cmbNoiseRemove.SelectedIndex = 0;
+                        if (cmbNoiseMatrixSize.SelectedIndex == -1) cmbNoiseMatrixSize.SelectedIndex = 0;
+
+                        // Varsay─▒lan olarak ekleme se├ºili gelsin ve event tetiklensin
+                        rbNoiseAdd.Checked = true;
+                        rbNoise_CheckedChanged(null, null);
+                        break;
+                    case "Konvol├╝syon ─░┼ƒlemi (mean)":
+                        pnlMatrixFilter.Visible = true;
+                        if (cmbMatrixSize.SelectedIndex == -1) cmbMatrixSize.SelectedIndex = 0;
+                        break;
+                    case "Morfolojik ─░┼ƒlemler (Geni┼ƒleme, A┼ƒ─▒nma, A├ºma, Kapama)":
+                        pnlMorphology.Visible = true;
+                        if (cmbMorphologyType.SelectedIndex == -1) cmbMorphologyType.SelectedIndex = 0;
+                        if (cmbMorphMatrixSize.SelectedIndex == -1) cmbMorphMatrixSize.SelectedIndex = 0;
+                        if (cmbMorphShape.SelectedIndex == -1) cmbMorphShape.SelectedIndex = 0; // Varsay─▒lan Kare
+
+                        GenerateMorphMatrix(); // Ekran a├º─▒l─▒r a├º─▒lmaz matrisi ├ºiz
+                        break;
+                    case "G├╢r├╝nt├╝ye Filtre Uygulanmas─▒ (Unsharp)":
+                        pnlUnsharp.Visible = true;
+                        if (cmbUnsharpMatrix.SelectedIndex == -1) cmbUnsharpMatrix.SelectedIndex = 0;
+                        break;
+                    case "Kenar Bulma Algoritmalar─▒n─▒n Kullan─▒m─▒ (prewitt)":
+                        pnlEdgeDetection.Visible = true;
+                        if (cmbEdgeType.SelectedIndex == -1) cmbEdgeType.SelectedIndex = 0; // Varsay─▒lan Yatay
+
+                        GenerateEdgeMatrix(); // Ekran a├º─▒l─▒r a├º─▒lmaz matrisi ├ºiz
+                        break;
+                    case "Renk Uzay─▒ D├╢n├╝┼ƒ├╝mleri":
+                        pnlColorSpace.Visible = true;
+                        RenkUzayiComboDoldur();
+                        break;
+                }
+            }
+        }
+
+        private static readonly string[] RenkUzayiSecenekleri =
+        {
+            "RGB -> HSV",
+            "HSV -> RGB",
+            "RGB -> YCbCr",
+            "YCbCr -> RGB",
+            "RGB -> CMYK",
+            "RGB -> Gri (Luminance)"
+        };
+
+        /// <summary>Designer/eski exe senkronu bozulmas─▒n diye liste her a├º─▒l─▒┼ƒta kodla doldurulur.</summary>
+        private void RenkUzayiComboDoldur()
+        {
+            string onceki = cmbColorSpace.SelectedItem?.ToString();
+            cmbColorSpace.Items.Clear();
+            cmbColorSpace.Items.AddRange(RenkUzayiSecenekleri);
+            int idx = Array.IndexOf(RenkUzayiSecenekleri, onceki);
+            cmbColorSpace.SelectedIndex = idx >= 0 ? idx : 0;
+        }
+
+        // --- 3. EKRAN TEM─░ZLEME YARDIMCISI ---
+        private void PanelleriGizle()
+        {
+            // Ortadaki 2. resim kutusunu gizle
+            if (picInput2 != null) picInput2.Visible = false;
+
+            // TABLOYU D├£ZELT: Ortadaki s├╝tunu (Column 1) yok et, Giri┼ƒ ve ├ç─▒k─▒┼ƒ'─▒ %50-%50 yay.
+            tableLayoutPanel1.ColumnStyles[0].Width = 50f; // 1. Resim %50 alan kaplas─▒n
+            tableLayoutPanel1.ColumnStyles[1].Width = 0f;  // 2. Resim alan─▒n─▒ tamamen s─▒f─▒rla (Gizle)
+            tableLayoutPanel1.ColumnStyles[2].Width = 50f; // ├ç─▒kt─▒ Resmi %50 alan kaplas─▒n
+
+            // Panelleri gizle
+            if (pnlBinary != null) pnlBinary.Visible = false;
+            if (pnlRotate != null) pnlRotate.Visible = false;
+            if (pnlCrop != null) pnlCrop.Visible = false;
+            if (pnlScale != null) pnlScale.Visible = false;
+            if (pnlArithmetic != null) pnlArithmetic.Visible = false;
+            if (pnlHistogram != null) pnlHistogram.Visible = false;
+            if (pnlContrast != null) pnlContrast.Visible = false;
+            if (pnlThresholding != null) pnlThresholding.Visible = false;
+            if (pnlNoise != null) pnlNoise.Visible = false;
+            if (pnlMatrixFilter != null) pnlMatrixFilter.Visible = false;
+            if (pnlMorphology != null) pnlMorphology.Visible = false;
+            if (pnlUnsharp != null) pnlUnsharp.Visible = false;
+            if (pnlEdgeDetection != null) pnlEdgeDetection.Visible = false;
+            if (pnlColorSpace != null) pnlColorSpace.Visible = false;
+
+            // Histogram tuvalini temizle
+            if (picHistogram != null) picHistogram.Image = null;
+            if (picHistogramResult != null) picHistogramResult.Image = null;
+        }
+
+
+        // --- 4. ─░┼₧LEM─░ UYGULA BUTONU ---
+
+        private void btnUygula_Click(object sender, EventArgs e)
+        {
+
+
+            // 1. KONTROL: Resim var m─▒?
+            if (picInput1.Image == null)
+            {
+                MessageBox.Show("HATA: Sol kutuda i┼ƒlenecek bir resim yok!", "Detektif 1");
+                return;
+            }
+
+            // 2. KONTROL: Men├╝den bir ┼ƒey se├ºilmi┼ƒ mi?
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show("HATA: Sol men├╝den hi├ºbir i┼ƒlem se├ºilmemi┼ƒ!", "Detektif 2");
+                return;
+            }
+
+            // Se├ºilen men├╝ isminin ba┼ƒ─▒ndaki ve sonundaki g├╢r├╝nmez bo┼ƒluklar─▒ temizleyelim (Trim)
+            string secilenIslem = treeView1.SelectedNode.Text.Trim();
+
+            try
+            {
+                picOutput.Dock = DockStyle.Fill;
+                picOutput.SizeMode = PictureBoxSizeMode.Zoom;
+
+                switch (treeView1.SelectedNode.Text)
+                {
+                    case "Gri D├╢n├╝┼ƒ├╝m":
+                        // ImageProcessor'daki ConvertToGrayscale metodunu tetikliyoruz
+                        Bitmap kaynakGri = new Bitmap(picInput1.Image);
+                        picOutput.Image = ImageProcessor.ConvertToGrayscale(kaynakGri);
+                        break;
+
+                    
+                    case "Binary D├╢n├╝┼ƒ├╝m":
+                        // Aray├╝zdeki TrackBar (trkThreshold) ├╝zerinden statik de─ƒeri al─▒yoruz
+                        Bitmap kaynakBinary = new Bitmap(picInput1.Image);
+                        int binaryEsik = trkThreshold.Value;
+                        picOutput.Image = ImageProcessor.ConvertToBinary(kaynakBinary, binaryEsik);
+                        break;
+
+                    case "G├╢r├╝nt├╝ D├╢nd├╝rme":
+
+                        picOutput.Dock = DockStyle.None;
+                        picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                        int aciDegeri = (int)numAngle.Value;
+                        string yontem = cmbRotateInterpolation.Text;
+
+                        Bitmap dondurulmusResim = ImageProcessor.GoruntuDondur((Bitmap)picInput1.Image, aciDegeri, yontem);
+
+                        picOutput.Image = dondurulmusResim;
+
+
+                        break;
+
+
+                    case "Kontrast Art─▒rma":
+                        // 1. As─▒l kontrast ├ºubu─ƒunun de─ƒerini al─▒yoruz
+                        int secilenKontrast = trkContrast.Value;
+
+                        // 2. Orijinal resmi bozmadan kopyal─▒yoruz
+                        Bitmap kaynakKontrast = new Bitmap(picInput1.Image);
+
+                        // 3. De─ƒeri motora g├╢nderip sonucu sa─ƒdaki kutuya bas─▒yoruz
+                        picOutput.Image = ImageProcessor.KontrastUygula(kaynakKontrast, secilenKontrast);
+
+                        break;
+
+
+                    case "G├╢r├╝nt├╝ Yakla┼ƒt─▒rma/Uzakla┼ƒt─▒rma":
+
+                        picOutput.Dock = DockStyle.None;
+                        picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                        double secilenOran = Convert.ToDouble(numScale.Value);
+
+                        // Aray├╝zdeki ComboBox'tan y├╢ntemi okuyoruz (E─ƒer bo┼ƒsa varsay─▒lan Bilinear)
+                        string intYontem = cmbScaleInterpolation.SelectedItem != null
+                                        ? cmbScaleInterpolation.SelectedItem.ToString()
+                                        : "Bilinear";
+
+                        if (secilenOran > 0)
+                        {
+                            Bitmap kaynakOlcek = new Bitmap(picInput1.Image);
+
+                            
+                            Bitmap sonucOlcek = ImageProcessor.GoruntuOlcekle(kaynakOlcek, secilenOran, intYontem);
+
+                            picOutput.Image = sonucOlcek;
+
+                            // ─░LL├£ZYONU KIRAN MESAJ: Resmin arka planda ger├ºekten b├╝y├╝d├╝─ƒ├╝n├╝/k├╝├º├╝ld├╝─ƒ├╝n├╝ kan─▒tlar!
+                            MessageBox.Show($"Orijinal Boyut: {kaynakOlcek.Width} x {kaynakOlcek.Height} piksel\n" +
+                                            $"Yeni Boyut: {sonucOlcek.Width} x {sonucOlcek.Height} piksel\n" +
+                                            $"Kullan─▒lan Y├╢ntem: {intYontem}",
+                                            "─░┼ƒlem Ba┼ƒar─▒l─▒", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("L├╝tfen 0'dan b├╝y├╝k bir ├╢l├ºekleme oran─▒ giriniz.", "Hatal─▒ Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        break;
+
+                    case "G├╢r├╝nt├╝ K─▒rpma":
+                        {
+                            picOutput.Dock = DockStyle.None;
+                            picOutput.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                            // 1. Aray├╝zden de─ƒerleri okuyoruz.
+                            int baslangicX = (int)numCropX.Value;
+                            int baslangicY = (int)numCropY.Value;
+                            int genislik = (int)numCropHeight.Value;
+                            int yukseklik = (int)numCropWidth.Value;
+
+                            // 2. G├╝venlik Kontrol├╝: S─▒f─▒r veya eksi de─ƒerle resim k─▒rp─▒lamaz.
+                            if (genislik <= 0 || yukseklik <= 0)
+                            {
+                                MessageBox.Show("L├╝tfen k─▒rp─▒lacak alan─▒n Geni┼ƒlik ve Y├╝kseklik de─ƒerlerini 0'dan b├╝y├╝k giriniz.", "Hatal─▒ Parametre", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                break;
+                            }
+
+                            // 3. Arka plan─▒n anlad─▒─ƒ─▒ dile ├ºeviri (Matematiksel D├╢n├╝┼ƒ├╝m)
+                            // x2 noktas─▒ = Ba┼ƒlang─▒├º X noktas─▒ + K─▒rp─▒lacak Geni┼ƒlik
+                            int x1 = baslangicX;
+                            int y1 = baslangicY;
+                            int x2 = baslangicX + genislik;
+                            int y2 = baslangicY + yukseklik;
+
+                            // 4. Orijinal resmi koruyarak kopyas─▒n─▒ al ve k─▒rpma metoduna g├╢nder
+                            Bitmap kaynakKirpma = new Bitmap(picInput1.Image);
+                            picOutput.Image = ImageProcessor.CropImage(kaynakKirpma, x1, y1, x2, y2);
+
+                            break;
+                        }
+
+
+                    case "Histogram ─░┼ƒlemleri (germe/geni┼ƒletme)":
+                        {
+                            Bitmap srcH = new Bitmap(picInput1.Image);
+
+                            // Once giris histogramini her durumda cizdirelim
+                            int[] histOrj = PikselIslem.HistogramHesapla(srcH);
+                            picHistogram.Image = PikselIslem.HistogramCiz(histOrj);
+
+                            string secimHist = cmbHistogram.SelectedItem != null
+                                ? cmbHistogram.SelectedItem.ToString()
+                                : "Histogram Germe";
+
+                            Bitmap cikisHist;
+                            if (secimHist == "Histogram Geni┼ƒletme")
+                                cikisHist = PikselIslem.HistogramGenisletme(srcH);
+                            else
+                                cikisHist = PikselIslem.HistogramGerme(srcH);
+
+                            picOutput.Image = cikisHist;
+
+                            // Cikis histogramini da yan tuvale cizdirelim
+                            int[] histYeni = PikselIslem.HistogramHesapla(new Bitmap(cikisHist));
+                            picHistogramResult.Image = PikselIslem.HistogramCiz(histYeni);
+                            break;
+                        }
+
+                    case "─░ki Resim Aras─▒nda Aritmetik ─░┼ƒlemler (ekleme, b├╢lme)":
+
+                        // 1. ─░kinci resim y├╝kl├╝ m├╝ kontrol├╝
+                        if (picInput2.Image == null)
+                        {
+                            MessageBox.Show("Bu i┼ƒlem i├ºin '─░kinci Resmi Y├╝kle' men├╝s├╝nden 2. bir resim se├ºmelisiniz!", "Eksik Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // 2. ComboBox'tan i┼ƒlem se├ºilmi┼ƒ mi kontrol├╝
+                        if (cmbAritmetik.SelectedItem == null)
+                        {
+                            MessageBox.Show("L├╝tfen yap─▒lacak aritmetik i┼ƒlemi se├ºiniz (Toplam, ├ç─▒karma vb.).", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+
+                        Bitmap resim1 = new Bitmap(picInput1.Image);
+                        Bitmap resim2 = new Bitmap(picInput2.Image);
+                        Bitmap sonucAritmetik = null;
+
+                        string islem = cmbAritmetik.SelectedItem.ToString();
+
+                        // Se├ºilen string de─ƒere g├╢re ilgili statik metodu tetikliyoruz
+                        if (islem == "Toplam")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimTopla(resim1, resim2);
+                        }
+                        else if (islem == "├ç─▒karma")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimCikar(resim1, resim2);
+                        }
+                        else if (islem == "├çarpma")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimCarp(resim1, resim2);
+                        }
+                        else if (islem == "B├╢lme")
+                        {
+                            sonucAritmetik = GoruntuIslem.ResimBol(resim1, resim2);
+                        }
+
+                        // E─ƒer metodlar null d├╢nd├╝rmediyse (yani boyutlar e┼ƒle┼ƒtiyse) resmi ekrana bas
+                        if (sonucAritmetik != null)
+                        {
+                            picOutput.Image = sonucAritmetik;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Hata: ─░┼ƒlem yap─▒lacak resimlerin boyutlar─▒ (Geni┼ƒlik ve Y├╝kseklik) birebir ayn─▒ olmal─▒d─▒r!", "Boyut Uyu┼ƒmazl─▒─ƒ─▒", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                        break;
+
+
+                    case "Morfolojik ─░┼ƒlemler (Geni┼ƒleme, A┼ƒ─▒nma, A├ºma, Kapama)":
+                        Bitmap srcMorph = new(picInput1.Image);
+                        string islemTuru = cmbMorphologyType.SelectedItem.ToString();
+
+                        // 1. Aray├╝zden de─ƒerleri dinamik olarak ├ºekiyoruz
+                        int mBoyut = int.Parse(cmbMorphMatrixSize.SelectedItem.ToString().Substring(0, 1));
+                        string mSekil = cmbMorphShape.SelectedItem.ToString();
+
+                        // 2. ─░┼ƒlemleri ├ºa─ƒ─▒r─▒rken bu 3 bilgiyi (resim, boyut, ┼ƒekil) g├╢nderiyoruz
+                        if (islemTuru == "Geni┼ƒleme (Dilation)")
+                        {
+                            picOutput.Image = GoruntuIslem.Genisleme(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "A┼ƒ─▒nma (Erosion)")
+                        {
+                            picOutput.Image = GoruntuIslem.Asinma(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "A├ºma (Opening)")
+                        {
+                            picOutput.Image = GoruntuIslem.Acma(srcMorph, mBoyut, mSekil);
+                        }
+                        else if (islemTuru == "Kapama (Closing)")
+                        {
+                            picOutput.Image = GoruntuIslem.Kapama(srcMorph, mBoyut, mSekil);
+                        }
+                        break;
+
+                    case "G├╢r├╝nt├╝ye Filtre Uygulanmas─▒ (Unsharp)":
+                        if (picInput1.Image != null)
+                        {
+                            // 1. Resmi al
+                            Bitmap girisResmi = new Bitmap(picInput1.Image);
+
+                            // 2. Filtreyi uygula (1.5 keskinlik seviyesi - istersen de─ƒi┼ƒtirebilirsin)
+                            Bitmap sonucResmi = GoruntuIslem.UnsharpMask(girisResmi, 1.5);
+
+                            // 3. Sonucu ekrana yans─▒t
+                            picOutput.Image = sonucResmi;
+                        }
+                        else
+                        {
+                            MessageBox.Show("L├╝tfen i┼ƒlemi uygulamak i├ºin bir resim y├╝kleyin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        break;
+
+
+                    case "Kenar Bulma Algoritmalar─▒n─▒n Kullan─▒m─▒ (prewitt)":
+                        Bitmap srcPrewitt = new Bitmap(picInput1.Image);
+                        string secilenYon = cmbEdgeType.SelectedItem.ToString();
+                        
+                        picOutput.Image = ImageProcessor.ApplyPrewitt(srcPrewitt, secilenYon);
+                        break;
+
+                    case "Konvol├╝syon ─░┼ƒlemi (mean)":
+                        {
+                            if (cmbMatrixSize.SelectedItem == null)
+                            {
+                                MessageBox.Show("L├╝tfen matris boyutunu se├ºiniz (3x3, 5x5, 7x7).", "Bilgi");
+                                return;
+                            }
+
+                            Bitmap srcK = new Bitmap(picInput1.Image);
+                            int boyutK = int.Parse(cmbMatrixSize.SelectedItem.ToString().Split('x')[0]);
+                            picOutput.Image = PikselIslem.MeanKonvolusyon(srcK, boyutK);
+                            break;
+                        }
+
+                    case "Renk Uzay─▒ D├╢n├╝┼ƒ├╝mleri":
+                        {
+                            if (cmbColorSpace.SelectedItem == null)
+                            {
+                                MessageBox.Show("L├╝tfen bir renk uzay─▒ d├╢n├╝┼ƒ├╝m├╝ se├ºiniz.", "Bilgi");
+                                return;
+                            }
+
+                            Bitmap srcRu = new Bitmap(picInput1.Image);
+                            string hedefUzay = cmbColorSpace.SelectedItem.ToString();
+
+                            if (hedefUzay == "RGB -> HSV")
+                                picOutput.Image = PikselIslem.RgbToHsv(srcRu);
+                            else if (hedefUzay == "HSV -> RGB")
+                                picOutput.Image = PikselIslem.HsvToRgb(srcRu);
+                            else if (hedefUzay == "RGB -> YCbCr")
+                                picOutput.Image = PikselIslem.RgbToYCbCr(srcRu);
+                            else if (hedefUzay == "YCbCr -> RGB")
+                                picOutput.Image = PikselIslem.YCbCrToRgb(srcRu);
+                            else if (hedefUzay == "RGB -> CMYK")
+                                picOutput.Image = PikselIslem.RgbToCmyk(srcRu);
+                            else if (hedefUzay == "RGB -> Gri (Luminance)")
+                                picOutput.Image = PikselIslem.RgbToGri(srcRu);
+                            else
+                                MessageBox.Show("Bu d├╢n├╝┼ƒ├╝m hen├╝z desteklenmiyor: " + hedefUzay, "Bilgi");
+                            break;
+                        }
+
+                    case "G├╝r├╝lt├╝ Ekleme (Salt&Pepper)/Temizleme (mean, median)":
+                        Bitmap kaynakResim = new Bitmap(picInput1.Image);
+
+                        if (rbNoiseAdd.Checked) // Ekleme
+                        {
+                            if (cmbNoiseAdd.SelectedItem != null)
+                            {
+                                string gurultuTuru = cmbNoiseAdd.SelectedItem.ToString();
+                                
+                                int oran = trkNoisePercentage.Value; 
+                                
+                                picOutput.Image = ImageProcessor.AddNoise(kaynakResim, oran, gurultuTuru);
+                            }
+                        }
+                        else // Temizleme
+                        {
+                            if (cmbNoiseRemove.SelectedItem != null && cmbNoiseMatrixSize.SelectedItem != null)
+                            {
+                                string filtreTuru = cmbNoiseRemove.SelectedItem.ToString();
+
+                                // Matris box ─▒ndaki stringten de─ƒeri ├ºekiyoruz parse ederek: 5x5->5
+                                int matrisBoyutu = int.Parse(cmbNoiseMatrixSize.SelectedItem.ToString().Split('x')[0]);
+
+                                if (filtreTuru == "Mean Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMeanFilter(kaynakResim, matrisBoyutu);
+                                }
+                                else if (filtreTuru == "Median Filtresi")
+                                {
+                                    picOutput.Image = ImageProcessor.ApplyMedianFilter(kaynakResim, matrisBoyutu);
+                                }
+                            }
+                        }
+                        break;
+
+                    case "E┼ƒikleme i┼ƒlemleri (Tek E┼ƒikleme)":
+                        Bitmap srcThreshold = new Bitmap(picInput1.Image);
+
+                        if (rbStaticThreshold.Checked)
+                        {
+                            // Statik e┼ƒikleme
+                            int esik = trkTreshold2.Value;
+                            picOutput.Image = ImageProcessor.ApplyStaticThreshold(srcThreshold, esik);
+                        }
+                        else
+                        {
+                            // Dinamik (Adaptif) e┼ƒikleme - G├╝r├╝lt├╝ temizlemedeki gibi: 5x5->5
+                            string matrisStr = cmbThresholdMatrix.SelectedItem.ToString(); 
+                            int matrisBoyutu = int.Parse(matrisStr.Split('x')[0]); 
+
+                            picOutput.Image = ImageProcessor.ApplyDynamicThreshold(srcThreshold, matrisBoyutu);
+                        }
+                        break;
+
+                    default:
+                        MessageBox.Show("Bu i┼ƒlem hen├╝z kodlanmad─▒.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("─░┼ƒlem s─▒ras─▒nda bir hata olu┼ƒtu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // --- 5. RES─░M Y├£KLEME KODLARI ---
+        private void resimY├╝kleToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Resim Dosyalar─▒|*.jpg;*.jpeg;*.png;*.bmp|T├╝m Dosyalar|*.*";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    using (var tempImage = Image.FromFile(ofd.FileName))
+                    {
+                        picInput1.BackColor = Color.White;
+                        picInput1.Image = new Bitmap(tempImage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Birinci resim y├╝klenirken hata olu┼ƒtu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void ikinciResmiY├╝kleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Resim Dosyalar─▒|*.jpg;*.jpeg;*.png;*.bmp|T├╝m Dosyalar|*.*";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    using (var tempImage = Image.FromFile(ofd.FileName))
+                    {
+                        picInput2.BackColor = Color.White;
+                        picInput2.Image = new Bitmap(tempImage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("─░kinci resim y├╝klenirken hata olu┼ƒtu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void rbNoise_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbNoiseAdd.Checked)
+            {
+                cmbNoiseAdd.Enabled = true;
+                trkNoisePercentage.Enabled = true; // Oran ├ºubu─ƒu aktif
+                numNoisePercentage.Enabled = true; // Say─▒ kutusu aktif
+
+                cmbNoiseRemove.Enabled = false;
+                cmbNoiseMatrixSize.Enabled = false; // Eklemede matris kutusu kapal─▒
+                cmbNoiseMatrixSize.Enabled = false;
+            }
+            else
+            {
+                cmbNoiseAdd.Enabled = false;
+                trkNoisePercentage.Enabled = false; // Oran ├ºubu─ƒu pasif
+                numNoisePercentage.Enabled = false; // Say─▒ kutusu pasif
+
+                cmbNoiseRemove.Enabled = true;
+                cmbNoiseMatrixSize.Enabled = true; // Temizlemede matris kutusu a├º─▒k
+                cmbNoiseMatrixSize.Enabled = true;
+            }
+        }
+
+        private void rbThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbStaticThreshold.Checked)
+            {
+                trkTreshold2.Enabled = true;
+                numThreshold.Enabled = true; // Say─▒ kutusu aktif
+                cmbThresholdMatrix.Enabled = false;
+            }
+            else
+            {
+                trkTreshold2.Enabled = false;
+                numThreshold.Enabled = false; // Say─▒ kutusu pasif
+                cmbThresholdMatrix.Enabled = true;
+            }
+        }
+
+        // Se├ºimlerden herhangi biri de─ƒi┼ƒti─ƒinde matrisi yeniden ├ºizecek olay
+        private void UpdateMorphMatrix_Event(object sender, EventArgs e)
+        {
+            GenerateMorphMatrix();
+        }
+
+        // Matrisi dinamik olarak ekrana ├ºizen as─▒l beyin
+        private void GenerateMorphMatrix()
+        {
+            if (cmbMorphMatrixSize.SelectedIndex == -1 || cmbMorphShape.SelectedIndex == -1) return;
+
+            gbMorphMatrix.Controls.Clear(); // Eski matrisi temizle
+
+            // Boyutu belirle
+            int size = 3;
+            if (cmbMorphMatrixSize.SelectedIndex == 1) size = 5;
+            else if (cmbMorphMatrixSize.SelectedIndex == 2) size = 7;
+
+            string shape = cmbMorphShape.SelectedItem.ToString();
+            bool isCustom = (shape == "├ûzel (Custom)"); // Sadece ├╢zel se├ºiliyse d─▒┼ƒar─▒dan veri girilebilir
+
+            morphMatrixTextBoxes = new TextBox[size, size];
+
+            int cellSize = 35; // Her bir kutunun boyutu
+            int startX = 20;   // ├çer├ºeveden i├º bo┼ƒluk
+            int startY = 35;
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    TextBox txt = new TextBox();
+                    txt.Size = new Size(cellSize, cellSize);
+                    txt.Location = new Point(startX + j * (cellSize + 5), startY + i * (cellSize + 5));
+                    txt.TextAlign = HorizontalAlignment.Center;
+                    txt.MaxLength = 1; // Sadece 1 karakter (0 veya 1)
+                    txt.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+                    txt.ReadOnly = !isCustom; // ├ûzel de─ƒilse kutular─▒ kilitle
+
+                    // ┼₧ekle g├╢re 0 veya 1 atama mant─▒─ƒ─▒
+                    if (shape == "Kare (Square)")
+                    {
+                        txt.Text = "1";
+                    }
+                    else if (shape == "Ha├º (Cross)")
+                    {
+                        // Sadece tam ortadaki sat─▒r veya s├╝tun 1 olur
+                        txt.Text = (i == size / 2 || j == size / 2) ? "1" : "0";
+                    }
+                    else if (shape == "Daire (Circle)")
+                    {
+                        // Merkeze olan uzakl─▒─ƒ─▒ hesaplay─▒p basit bir ├ºember ├º─▒kar─▒yoruz
+                        double center = size / 2.0;
+                        double dist = Math.Sqrt(Math.Pow(i - (int)center, 2) + Math.Pow(j - (int)center, 2));
+                        txt.Text = dist <= center ? "1" : "0";
+                    }
+                    else
+                    {
+                        txt.Text = "0"; // Custom se├ºilirse hepsi 0 gelsin, kullan─▒c─▒ kendi 1 yaps─▒n
+                    }
+
+                    // E─ƒer de─ƒer 0 ise arka plan─▒ hafif gri yap ki ┼ƒekil g├╢zle net anla┼ƒ─▒ls─▒n
+                    if (txt.Text == "0") txt.BackColor = Color.LightGray;
+                    else txt.BackColor = Color.White;
+
+                    morphMatrixTextBoxes[i, j] = txt;
+                    gbMorphMatrix.Controls.Add(txt);
+                }
+            }
+        }
+
+        // Se├ºim de─ƒi┼ƒti─ƒinde matrisi g├╝ncelleyecek olay
+        private void UpdateEdgeMatrix_Event(object sender, EventArgs e)
+        {
+            GenerateEdgeMatrix();
+        }
+
+        // Matrisi se├ºilen y├╢ne g├╢re dolduran beyin
+        private void GenerateEdgeMatrix()
+        {
+            if (cmbEdgeType.SelectedIndex == -1) return;
+
+            if (cmbEdgeType.SelectedIndex == 0) // Yatay (Horizontal)
+            {
+                // Prewitt Yatay Kernel
+                edgeMatrixLabels[0, 0].Text = "-1"; edgeMatrixLabels[0, 1].Text = "0"; edgeMatrixLabels[0, 2].Text = "1";
+                edgeMatrixLabels[1, 0].Text = "-1"; edgeMatrixLabels[1, 1].Text = "0"; edgeMatrixLabels[1, 2].Text = "1";
+                edgeMatrixLabels[2, 0].Text = "-1"; edgeMatrixLabels[2, 1].Text = "0"; edgeMatrixLabels[2, 2].Text = "1";
+            }
+            else if (cmbEdgeType.SelectedIndex == 1) // Dikey (Vertical)
+            {
+                // Prewitt Dikey Kernel
+                edgeMatrixLabels[0, 0].Text = "1"; edgeMatrixLabels[0, 1].Text = "1"; edgeMatrixLabels[0, 2].Text = "1";
+                edgeMatrixLabels[1, 0].Text = "0"; edgeMatrixLabels[1, 1].Text = "0"; edgeMatrixLabels[1, 2].Text = "0";
+                edgeMatrixLabels[2, 0].Text = "-1"; edgeMatrixLabels[2, 1].Text = "-1"; edgeMatrixLabels[2, 2].Text = "-1";
+            }
+            else if (cmbEdgeType.SelectedIndex == 2) // Her ─░kisi (Magnitude)
+            {
+                // ─░ki matrisin birle┼ƒtirilece─ƒini sembolik olarak g├╢sterelim
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        edgeMatrixLabels[i, j].Text = ""; // ├ûnce temizle
+                    }
+                }
+
+                // Tam ortaya form├╝l├╝ yaz
+                edgeMatrixLabels[1, 1].Text = "Gx + Gy\n(Genlik)";
+            }
+
+            // Renklendirme mant─▒─ƒ─▒ (Opsiyonel, ┼ƒekli netle┼ƒtirmek i├ºin): 0'lar─▒ gri, di─ƒerlerini beyaz yap
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (edgeMatrixLabels[i, j].Text == "0") edgeMatrixLabels[i, j].BackColor = Color.LightGray;
+                    else if (string.IsNullOrEmpty(edgeMatrixLabels[i, j].Text)) edgeMatrixLabels[i, j].BackColor = Color.White; // Genlik durumu
+                    else edgeMatrixLabels[i, j].BackColor = Color.White;
+                }
+            }
+        }
+
+        private void CreateEdgeMatrixGrid()
+        {
+            edgeMatrixLabels = new Label[3, 3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    edgeMatrixLabels[i, j] = new Label();
+                    edgeMatrixLabels[i, j].Text = "0";
+                    edgeMatrixLabels[i, j].TextAlign = ContentAlignment.MiddleCenter;
+                    edgeMatrixLabels[i, j].Dock = DockStyle.Fill;
+                    edgeMatrixLabels[i, j].BorderStyle = BorderStyle.FixedSingle;
+                    edgeMatrixLabels[i, j].Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+                    tlpEdgeMatrix.Controls.Add(edgeMatrixLabels[i, j], j, i);
+                }
+            }
+        }
+
+        private void cmbHistogram_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // ─░leride histogram se├ºimi de─ƒi┼ƒti─ƒinde anl─▒k bir ┼ƒey yapmak istersen buray─▒ kullanabilirsin.
+        }
+
+        // Trackbar kayd─▒r─▒ld─▒─ƒ─▒nda say─▒y─▒ de─ƒi┼ƒtirir
+        // 1. TrackBar (Kayd─▒rma ├çubu─ƒu) de─ƒi┼ƒti─ƒinde
+        private void TrkTreshold2_ValueChanged(object sender, EventArgs e)
+        {
+            // ├ûNEML─░: E─ƒer say─▒ kutusundaki de─ƒer zaten ├ºubukla ayn─▒ysa i┼ƒlem yapma!
+            if (numThreshold.Value != (decimal)trkTreshold2.Value)
+            {
+                numThreshold.Value = (decimal)trkTreshold2.Value;
+            }
+        }
+
+               
+
+        // Say─▒ kutusuna rakam yaz─▒ld─▒─ƒ─▒nda Trackbar'─▒ o hizaya kayd─▒r─▒r
+        // 2. NumericUpDown (Say─▒ Kutusu) de─ƒi┼ƒti─ƒinde
+        private void NumThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            // ├ûNEML─░: E─ƒer ├ºubuktaki de─ƒer zaten say─▒ kutusuyla ayn─▒ysa i┼ƒlem yapma!
+            if (trkTreshold2.Value != (int)numThreshold.Value)
+            {
+                trkTreshold2.Value = (int)numThreshold.Value;
+            }
+        }
+
+        private void TrkNoisePercentage_ValueChanged(object sender, EventArgs e)
+        {
+            if (numNoisePercentage.Value != trkNoisePercentage.Value)
+                numNoisePercentage.Value = trkNoisePercentage.Value;
+        }
+
+        private void NumNoisePercentage_ValueChanged(object sender, EventArgs e)
+        {
+            if (trkNoisePercentage.Value != (int)numNoisePercentage.Value)
+                trkNoisePercentage.Value = (int)numNoisePercentage.Value;
+        }
+
+
+    }
+}

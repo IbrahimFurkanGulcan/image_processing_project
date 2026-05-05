@@ -3,18 +3,20 @@
     partial class Form1
     {
         private System.ComponentModel.IContainer components = null;
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null)) components.Dispose();
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
             base.Dispose(disposing);
         }
+
+        #region Windows Form Designer generated code
+
         private void InitializeComponent()
         {
-<<<<<<< HEAD
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        }
-=======
             splitContainer1 = new SplitContainer();
             treeView1 = new TreeView();
             menuStrip1 = new MenuStrip();
@@ -1400,6 +1402,5 @@
         private System.Windows.Forms.Button btnUygula;
         private System.Windows.Forms.Label esikdegerLabel;
         private Panel pnlOutputContainer;
->>>>>>> b44e993864020b385209e9ced15cc5874c8beb92
     }
 }
