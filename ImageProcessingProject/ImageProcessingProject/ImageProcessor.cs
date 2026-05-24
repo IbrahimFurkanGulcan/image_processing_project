@@ -392,5 +392,9 @@ namespace ImageProcessingProject
             result.UnlockBits(resData);
             return result;
         }
+
+        // ==========================================================
+        // 7. Aritmetik ilemler
+        // ==========================================================
     }
 }
